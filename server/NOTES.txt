@@ -1,0 +1,8 @@
+/* Short security & operational notes
+ - Cookie: set secure:true and sameSite=strict in production with HTTPS.
+ - CORS: limit origins in production.
+ - Validate inputs on all endpoints (schema validation like Joi recommended).
+ - Rate-limit AI endpoints to prevent abuse.
+ - Do not send PII to third-party LLMs; sanitize before forwarding.
+ - Use HTTPS, helmet, and proper logging in production.
+*/
