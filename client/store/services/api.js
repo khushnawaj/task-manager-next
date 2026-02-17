@@ -3,7 +3,7 @@ import { clearAuth } from '../slices/authSlice';
 import toast from 'react-hot-toast';
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: 'http://localhost:4000/api/',
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/',
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token;
     if (token) {

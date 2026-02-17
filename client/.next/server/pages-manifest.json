@@ -3,7 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/organizations/[id]": "pages/organizations/[id].js",
-  "/my-tasks": "pages/my-tasks.js",
   "/organizations/[id]/projects/[projectId]": "pages/organizations/[id]/projects/[projectId].js",
   "/dashboard": "pages/dashboard.js"
 }

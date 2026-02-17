@@ -27,11 +27,6 @@
       "static/chunks/main.js",
       "static/chunks/pages/dashboard.js"
     ],
-    "/organizations/[id]": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/organizations/[id].js"
-    ],
     "/organizations/[id]/projects/[projectId]": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
