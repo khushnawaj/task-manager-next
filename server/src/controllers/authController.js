@@ -22,35 +22,36 @@ export const signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!email || !password || !name) return res.status(400).json({ error: "Missing fields" });
-    
+
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ error: "Email taken" });
-    
+
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, passwordHash });
 
     // Create Default Organization
     const baseSlug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
     const slug = `${baseSlug}-${Math.floor(Math.random() * 10000)}`;
-    
+
     const org = await Organization.create({
       name: `${name}'s Workspace`,
       slug,
       ownerId: user._id,
       members: [{ userId: user._id, role: 'admin' }]
     });
-    
+
     const accessToken = signAccess(user);
     const refreshToken = signRefresh(user);
-    
+
     user.refreshTokens.push({ token: refreshToken, createdAt: new Date() });
     await user.save();
-    
+
     // Set refresh token as httpOnly secure cookie
-    res.cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "lax", maxAge: 7*24*3600*1000 });
-    
-    res.json({ 
-      user: { id: user._id, name: user.name, email: user.email }, 
+    res.cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "lax", maxAge: 7 * 24 * 3600 * 1000 });
+
+    // Signup response
+    res.json({
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
       accessToken,
       organizations: [org]
     });
@@ -64,25 +65,25 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: "Missing fields" });
-    
+
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
-    
+
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(400).json({ error: "Invalid credentials" });
-    
+
     const accessToken = signAccess(user);
     const refreshToken = signRefresh(user);
-    
+
     user.refreshTokens.push({ token: refreshToken, createdAt: new Date() });
     await user.save();
-    
+
     // Fetch Organizations
     const organizations = await Organization.find({ "members.userId": user._id });
 
     res.cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "lax" });
-    res.json({ 
-      user: { id: user._id, name: user.name, email: user.email }, 
+    res.json({
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
       accessToken,
       organizations
     });

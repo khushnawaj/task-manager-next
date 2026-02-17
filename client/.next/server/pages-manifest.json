@@ -2,5 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/signup": "pages/signup.js"
+  "/dashboard": "pages/dashboard.js",
+  "/my-tasks": "pages/my-tasks.js",
+  "/organizations/[id]": "pages/organizations/[id].js",
+  "/organizations/[id]/projects/[projectId]": "pages/organizations/[id]/projects/[projectId].js"
 }

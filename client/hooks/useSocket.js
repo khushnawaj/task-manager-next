@@ -10,7 +10,7 @@ export default function useSocket(projectId) {
 
   useEffect(() => {
     if (!projectId || !token) return;
-    
+
     // Connect
     const socket = io(process.env.NEXT_PUBLIC_SOCKET || "http://localhost:4000", {
       auth: { token },
@@ -19,8 +19,13 @@ export default function useSocket(projectId) {
     sockRef.current = socket;
 
     socket.on("connect", () => {
+      console.log("Socket connected to project:", projectId);
       // Join Room
       socket.emit("joinProject", { projectId });
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("Socket connection error:", err.message);
     });
 
     // Handle Create
@@ -28,19 +33,19 @@ export default function useSocket(projectId) {
       dispatch(tasksApi.util.updateQueryData("getProjectTasks", projectId, (draft) => {
         // Prevent duplicates
         if (!draft.some(t => t._id === task._id)) {
-            draft.unshift(task);
+          draft.unshift(task);
         }
       }));
     });
 
     // Handle Update & Assign
     const handleUpdate = ({ task }) => {
-       dispatch(tasksApi.util.updateQueryData("getProjectTasks", projectId, (draft) => {
+      dispatch(tasksApi.util.updateQueryData("getProjectTasks", projectId, (draft) => {
         const idx = draft.findIndex(t => t._id === task._id);
         if (idx !== -1) {
-            // Keep keys that might be missing in partial update if necessary, 
-            // but usually backend sends full task on update.
-            draft[idx] = { ...draft[idx], ...task };
+          // Keep keys that might be missing in partial update if necessary, 
+          // but usually backend sends full task on update.
+          draft[idx] = { ...draft[idx], ...task };
         }
       }));
     };
@@ -50,10 +55,10 @@ export default function useSocket(projectId) {
 
     // Handle Delete
     socket.on("task:deleted", ({ taskId }) => {
-        dispatch(tasksApi.util.updateQueryData("getProjectTasks", projectId, (draft) => {
-            const idx = draft.findIndex(t => t._id === taskId);
-            if (idx !== -1) draft.splice(idx, 1);
-        }));
+      dispatch(tasksApi.util.updateQueryData("getProjectTasks", projectId, (draft) => {
+        const idx = draft.findIndex(t => t._id === taskId);
+        if (idx !== -1) draft.splice(idx, 1);
+      }));
     });
 
     return () => {

@@ -16,13 +16,18 @@ export default function ProjectPage() {
 
   return (
     <>
-      <Navbar/>
+      <Navbar />
       <div className="p-6">
         <h2 className="text-xl mb-4">Project {id}</h2>
-        <button className="bg-green-600 text-white px-3 py-1 rounded mb-4" onClick={()=>setOpen(true)}>New Task</button>
+        <button className="bg-green-600 text-white px-3 py-1 rounded mb-4" onClick={() => setOpen(true)}>New Task</button>
         {isLoading ? <div>Loading...</div> : tasks.map(t => <TaskCard key={t._id} task={t} />)}
       </div>
-      {open && <CreateTaskModal projectId={id} createTask={createTask} onCreated={()=>setOpen(false)} onClose={()=>setOpen(false)} />}
+      {open && <CreateTaskModal projectId={id} createTask={createTask} onCreated={() => setOpen(false)} onClose={() => setOpen(false)} />}
     </>
   );
+}
+
+// Enable SSR for authenticated routes
+export async function getServerSideProps() {
+  return { props: {} };
 }

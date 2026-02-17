@@ -22,10 +22,20 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/signup": [
+    "/dashboard": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/signup.js"
+      "static/chunks/pages/dashboard.js"
+    ],
+    "/organizations/[id]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/organizations/[id].js"
+    ],
+    "/organizations/[id]/projects/[projectId]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/organizations/[id]/projects/[projectId].js"
     ]
   },
   "ampFirstPages": []

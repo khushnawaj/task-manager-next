@@ -1,10 +1,9 @@
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { clearAuth } from '../store/slices/authSlice';
-import { useLogoutMutation } from '../store/services/authApi';
 import Layout from '../components/Layout';
+import { LayoutDashboard, Plus, ArrowRight, User } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, organizations } = useSelector((state) => state.auth);
@@ -18,73 +17,92 @@ export default function Dashboard() {
 
   return (
     <Layout title="Dashboard">
-      <div className="max-w-7xl mx-auto p-4 sm:p-8">
-        
-        {/* Welcome Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 to-purple-600 p-8 sm:p-12 mb-10 shadow-2xl shadow-indigo-500/20">
-            <div className="relative z-10 animate-fade-in">
-                <h1 className="text-3xl sm:text-5xl font-bold text-white mb-2">
-                    Welcome back, {user.name.split(' ')[0]}
-                </h1>
-                <p className="text-indigo-100 text-lg max-w-xl">
-                    Ready to build something extraordinary today? Select a workspace to get started.
-                </p>
-            </div>
-            {/* Decoration */}
-            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-10 w-40 h-40 bg-pink-500/20 rounded-full blur-2xl"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* Welcome Section */}
+        <div className="mb-10 animate-fade-in-down">
+          <h1 className="text-3xl font-display font-semibold text-brand-900">
+            Welcome back, <span className="text-brand-600">{user.name.split(' ')[0]}</span>
+          </h1>
+          <p className="text-brand-500 max-w-xl mt-2">
+            Select a workspace to manage your projects and tasks.
+          </p>
         </div>
 
-        {/* Section Header */}
-        <div className="flex justify-between items-end mb-6 px-2">
-            <div>
-                <h2 className="text-xl font-bold text-white tracking-tight">Your Workspaces</h2>
-                <p className="text-slate-400 text-sm">Where your teams collaborate</p>
-            </div>
-        </div>
-        
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {organizations.map((org) => (
-            <Link key={org._id} href={`/organizations/${org._id}`}>
-              <div className="glass-card p-6 rounded-2xl group relative h-48 flex flex-col justify-between overflow-hidden">
-                <div className="relative z-10">
+        {/* Workspaces Grid */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-medium text-brand-900 flex items-center gap-2">
+              <LayoutDashboard size={20} className="text-brand-500" /> Your Workspaces
+            </h2>
+            <button
+              onClick={() => alert("Feature coming soon in Phase 2")}
+              className="text-sm font-medium text-brand-600 hover:text-brand-800 transition-colors flex items-center gap-1"
+            >
+              <Plus size={16} /> New Workspace
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {organizations.map((org) => (
+              <Link key={org._id} href={`/organizations/${org._id}`}>
+                <div className="group bg-white border border-brand-200 rounded-xl p-6 hover:shadow-md hover:border-brand-300 transition-all duration-200 cursor-pointer h-full flex flex-col justify-between">
+                  <div>
                     <div className="flex justify-between items-start mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center text-indigo-400">
-                             <span className="text-2xl">🏢</span>
-                        </div>
-                        <span className="bg-slate-800 border border-slate-700 text-xs py-1 px-2 rounded-full text-slate-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-300 group-hover:border-indigo-500/30 transition-colors">
-                            {org.plan === 'pro' ? 'PRO' : 'FREE'}
-                        </span>
+                      <div className="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 border border-brand-100">
+                        <LayoutDashboard size={20} />
+                      </div>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider py-1 px-2 rounded-full ${org.plan === 'pro'
+                        ? 'bg-brand-900 text-white'
+                        : 'bg-brand-100 text-brand-600'
+                        }`}>
+                        {org.plan === 'pro' ? 'PRO' : 'FREE'}
+                      </span>
                     </div>
-                    <h3 className="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">{org.name}</h3>
-                    <p className="text-slate-500 text-sm mt-1">{org.members?.length || 1} Member{org.members?.length !== 1 && 's'}</p>
-                </div>
-                
-                <div className="relative z-10 pt-4 border-t border-white/5 mt-4 flex justify-between items-center">
-                    <span className="text-xs font-mono text-slate-600">{org.slug}</span>
-                    <span className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                        →
+
+                    <h3 className="text-lg font-semibold text-brand-900 group-hover:text-brand-700 transition-colors mb-1">
+                      {org.name}
+                    </h3>
+                    <p className="text-sm text-brand-500 line-clamp-1">
+                      {org.slug}
+                    </p>
+                  </div>
+
+                  <div className="mt-8 flex items-center justify-between pt-4 border-t border-brand-50">
+                    <div className="flex -space-x-2">
+                      {/* Placeholder avatars until we have member images */}
+                      <div className="w-6 h-6 rounded-full bg-brand-200 border-2 border-white flex items-center justify-center text-[10px] text-brand-600 font-medium">
+                        <User size={12} />
+                      </div>
+                      {(org.members?.length > 1) && (
+                        <div className="w-6 h-6 rounded-full bg-brand-50 border-2 border-white flex items-center justify-center text-[9px] text-brand-400 font-medium">
+                          +{org.members.length - 1}
+                        </div>
+                      )}
+                    </div>
+
+                    <span className="text-sm font-medium text-brand-600 group-hover:translate-x-1 transition-transform duration-200 flex items-center gap-1">
+                      Open <ArrowRight size={14} />
                     </span>
+                  </div>
                 </div>
-                
-                {/* Hover Glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </div>
-            </Link>
-          ))}
-          
-          {/* Create New Card */}
-          <button 
-                onClick={() => alert("Phase 2 Feature: Invite Only for now")}
-                className="group p-6 rounded-2xl border border-dashed border-slate-700 hover:border-indigo-500/50 hover:bg-slate-800/30 flex flex-col items-center justify-center h-48 transition-all"
-          >
-             <div className="w-14 h-14 rounded-full bg-slate-800 group-hover:bg-indigo-600 group-hover:shadow-lg group-hover:shadow-indigo-500/50 flex items-center justify-center text-slate-400 group-hover:text-white transition-all duration-300 mb-3">
-                 <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-             </div>
-             <span className="text-slate-400 group-hover:text-white font-medium transition-colors">Create Workspace</span>
-          </button>
-        </div>
+              </Link>
+            ))}
+
+            {/* Empty State / Create New Placeholder */}
+            {organizations.length === 0 && (
+              <button
+                onClick={() => alert("Please contact support to create an organization.")}
+                className="group bg-brand-50/50 border border-dashed border-brand-300 rounded-xl p-6 hover:bg-brand-50 hover:border-brand-400 transition-all duration-200 cursor-pointer h-48 flex flex-col items-center justify-center text-center"
+              >
+                <div className="w-10 h-10 rounded-full bg-white border border-brand-200 flex items-center justify-center text-brand-400 mb-3 group-hover:scale-110 transition-transform">
+                  <Plus size={20} />
+                </div>
+                <span className="text-sm font-medium text-brand-600">Create new workspace</span>
+              </button>
+            )}
+          </div>
+        </section>
       </div>
     </Layout>
   );

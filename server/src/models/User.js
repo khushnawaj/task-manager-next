@@ -5,7 +5,7 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, index: true },
   passwordHash: { type: String, required: true },
   avatarUrl: { type: String },
-  // role: { type: String, enum: ["admin","manager","member"], default: "member" }, // Removed for Organization-based RBAC
+  role: { type: String, enum: ["user", "admin"], default: "user" },
   refreshTokens: [{ token: String, createdAt: Date }]
 }, { timestamps: true });
 

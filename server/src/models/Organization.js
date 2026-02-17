@@ -6,7 +6,7 @@ const OrganizationSchema = new mongoose.Schema({
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   members: [{
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    role: { type: String, enum: ["admin", "manager", "member"], default: "member" },
+    role: { type: String, enum: ["admin", "manager", "member", "observer"], default: "member" },
     joinedAt: { type: Date, default: Date.now }
   }],
   plan: { type: String, enum: ["free", "pro", "enterprise"], default: "free" },
