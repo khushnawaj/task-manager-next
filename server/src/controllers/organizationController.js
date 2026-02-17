@@ -4,7 +4,7 @@ import Organization from "../models/Organization.js";
 export const getOrganization = async (req, res) => {
   try {
     const org = await Organization.findById(req.params.id)
-      .populate("members.userId", "name email");
+      .populate("members.userId", "name email avatarUrl");
 
     if (!org) return res.status(404).json({ error: "Organization not found" });
 
@@ -64,7 +64,7 @@ export const removeMember = async (req, res) => {
 export const getMyOrganizations = async (req, res) => {
   try {
     const orgs = await Organization.find({ "members.userId": req.user._id })
-      .populate("members.userId", "name email")
+      .populate("members.userId", "name email avatarUrl")
       .select("name slug plan members")
       .sort({ updatedAt: -1 });
 

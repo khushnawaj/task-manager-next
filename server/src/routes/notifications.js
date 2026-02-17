@@ -9,6 +9,7 @@ router.get("/", requireAuth, async (req, res) => {
     try {
         const notifications = await Notification.find({ userId: req.user._id })
             .sort({ createdAt: -1 })
+            .populate("senderId", "name avatarUrl")
             .limit(50);
         res.json(notifications);
     } catch (err) {

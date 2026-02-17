@@ -31,7 +31,18 @@ export const userApi = api.injectEndpoints({
             query: () => 'users/dashboard',
             providesTags: ['Dashboard'],
         }),
+        uploadAvatar: builder.mutation({
+            query: (formData) => ({
+                url: 'upload',
+                method: 'POST',
+                body: formData,
+            }),
+        }),
+        getRecentActivity: builder.query({
+            query: ({ page = 1, limit = 20 } = {}) => `users/activity?page=${page}&limit=${limit}`,
+            providesTags: ['Activity'],
+        }),
     }),
 });
 
-export const { useGetMeQuery, useUpdateProfileMutation, useGetDashboardDataQuery } = userApi;
+export const { useGetMeQuery, useUpdateProfileMutation, useGetDashboardDataQuery, useUploadAvatarMutation, useGetRecentActivityQuery } = userApi;

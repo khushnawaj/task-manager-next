@@ -18,11 +18,13 @@ export const getMe = async (req, res) => {
 // Update current user profile
 export const updateMe = async (req, res) => {
     try {
-        const { name, email } = req.body; // Allow email update? Usually requires verify. Let's stick to name for now.
+        const { name, email, bio, title, avatarUrl } = req.body;
 
-        // Only allow updating name for now for simplicity & security
         const updates = {};
         if (name) updates.name = name;
+        if (bio !== undefined) updates.bio = bio;
+        if (title !== undefined) updates.title = title;
+        if (avatarUrl !== undefined) updates.avatarUrl = avatarUrl;
 
         const user = await User.findByIdAndUpdate(
             req.user._id,
@@ -76,15 +78,7 @@ export const getDashboardData = async (req, res) => {
             (t.priority === 'critical' || t.priority === 'high')
         ).length;
 
-        // 3. Global Activity Feed (Audit logs for projects/orgs user has access to)
-        // We limit to most recent 20 events globally across accessible scopes
-        const recentActivity = await AuditLog.find({
-            organizationId: { $in: orgIds }
-        })
-            .populate('actor', 'name email')
-            .populate('projectId', 'name key')
-            .sort({ createdAt: -1 })
-            .limit(20);
+        // 3. (Removed Global Activity from here to separate endpoint)
 
         res.json({
             stats: {
@@ -92,13 +86,50 @@ export const getDashboardData = async (req, res) => {
                 tasksCompleted: completedTasksCount,
                 dueSoon: dueSoonCount,
                 urgentIssues: urgentCount,
-                // Calculated velocity/growth mock for UI
                 velocity: "+12%"
-            },
-            recentActivity
+            }
         });
     } catch (err) {
         console.error("Dashboard Data Error:", err);
         res.status(500).json({ error: "Failed to fetch dashboard data" });
     }
 };
+
+// Get Paginated Recent Activity
+export const getRecentActivity = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const userOrgs = await Organization.find({ "members.userId": userId }).select('_id');
+        const orgIds = userOrgs.map(o => o._id);
+
+        const query = { organizationId: { $in: orgIds } };
+
+        const [activity, total] = await Promise.all([
+            AuditLog.find(query)
+                .populate('actor', 'name email avatarUrl')
+                .populate('projectId', 'name key')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+            AuditLog.countDocuments(query)
+        ]);
+
+        res.json({
+            activity,
+            meta: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
+        });
+    } catch (err) {
+        console.error("Activity Error:", err);
+        res.status(500).json({ error: "Failed to fetch activity" });
+    }
+};
+

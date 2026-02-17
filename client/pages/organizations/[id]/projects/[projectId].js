@@ -121,8 +121,12 @@ const TaskColumn = ({ title, status, tasks, onTaskClick, children }) => {
 
                                                 <div className="flex -space-x-1">
                                                     {(task.assignees || []).slice(0, 2).map((u, i) => (
-                                                        <div key={i} title={u.name} className="w-5 h-5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-950 flex items-center justify-center text-[8px] font-semibold shadow-sm">
-                                                            {u.name?.[0]?.toUpperCase()}
+                                                        <div key={i} title={u.name} className="w-5 h-5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-950 flex items-center justify-center text-[8px] font-semibold shadow-sm overflow-hidden">
+                                                            {u.avatarUrl ? (
+                                                                <img src={u.avatarUrl} alt={u.name} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                u.name?.[0]?.toUpperCase()
+                                                            )}
                                                         </div>
                                                     ))}
                                                     {(!task.assignees || task.assignees.length === 0) && (
@@ -151,13 +155,21 @@ export default function ProjectBoard() {
     const { user } = useSelector(state => state.auth);
 
     const [viewMode, setViewMode] = useState('board');
+    const [page, setPage] = useState(1);
+
+    // Logic: Board view loads all (up to 500), List view uses pagination (10 per page)
+    const limit = viewMode === 'list' ? 10 : 500;
+    const queryArg = { projectId, page: viewMode === 'list' ? page : 1, limit };
 
     const { data: orgData } = useGetOrganizationQuery(organizationId, { skip: !organizationId || !user });
     const members = orgData?.organization?.members || [];
 
     useSocket(projectId);
 
-    const { data: tasks = [], isLoading } = useGetProjectTasksQuery(projectId, { skip: !projectId || !user });
+    const { data: taskData, isLoading } = useGetProjectTasksQuery(queryArg, { skip: !projectId || !user });
+    const tasks = taskData?.tasks || [];
+    const meta = taskData?.meta;
+
     const [createTask] = useCreateTaskMutation();
     const [updateTask] = useUpdateTaskMutation();
     const [deleteTask] = useDeleteTaskMutation();
@@ -165,6 +177,11 @@ export default function ProjectBoard() {
     const [selectedTask, setSelectedTask] = useState(null);
     const [newTaskTitle, setNewTaskTitle] = useState("");
     const [enabled, setEnabled] = useState(false);
+
+    // Reset page when switching views
+    useEffect(() => {
+        setPage(1);
+    }, [viewMode]);
 
     useEffect(() => {
         const animation = requestAnimationFrame(() => setEnabled(true));
@@ -215,7 +232,6 @@ export default function ProjectBoard() {
     return (
         <Layout title="Project Board">
             <div className="flex flex-col h-[calc(100vh-140px)]">
-                {/* Board Toolbar */}
                 {/* Board Toolbar */}
                 <header className="mb-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4 xl:gap-6 pb-6 border-b border-border">
                     <div className="flex items-center gap-4">
@@ -272,7 +288,7 @@ export default function ProjectBoard() {
                 </header>
 
                 {/* Main Content Area */}
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-hidden flex flex-col">
                     {viewMode === 'board' ? (
                         <div className="overflow-x-auto h-full pb-6 custom-scrollbar">
                             <DragDropContext onDragEnd={onDragEnd}>
@@ -300,8 +316,34 @@ export default function ProjectBoard() {
                             </DragDropContext>
                         </div>
                     ) : viewMode === 'list' ? (
-                        <div className="h-full overflow-y-auto pr-2 custom-scrollbar">
-                            <TaskListView tasks={tasks} onTaskClick={setSelectedTask} />
+                        <div className="h-full flex flex-col">
+                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                <TaskListView tasks={tasks} onTaskClick={setSelectedTask} />
+                            </div>
+                            {/* Pagination Controls */}
+                            {meta && meta.pages > 1 && (
+                                <div className="py-4 border-t border-border flex justify-between items-center bg-zinc-950/50">
+                                    <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">
+                                        Page {meta.page} of {meta.pages}
+                                    </span>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                                            disabled={page === 1}
+                                            className="p-2 border border-zinc-800 rounded-lg hover:bg-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-400"
+                                        >
+                                            <ChevronRight size={16} className="rotate-180" />
+                                        </button>
+                                        <button
+                                            onClick={() => setPage(p => Math.min(meta.pages, p + 1))}
+                                            disabled={page === meta.pages}
+                                            className="p-2 border border-zinc-800 rounded-lg hover:bg-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-400"
+                                        >
+                                            <ChevronRight size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : viewMode === 'workload' ? (
                         <div className="h-full overflow-y-auto pr-2 custom-scrollbar">

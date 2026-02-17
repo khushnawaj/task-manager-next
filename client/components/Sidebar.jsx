@@ -116,8 +116,12 @@ export default function Sidebar({ isOpen, onClose }) {
                         {/* Footer */}
                         <div className="p-4 border-t border-border bg-surface">
                             <div className="flex items-center gap-3 p-3 rounded-md bg-background border border-border">
-                                <div className="h-10 w-10 rounded-md bg-active flex items-center justify-center text-white font-semibold border border-border shrink-0">
-                                    {user.name?.[0]}
+                                <div className="h-10 w-10 rounded-md bg-active flex items-center justify-center text-white font-semibold border border-border shrink-0 overflow-hidden">
+                                    {user.avatarUrl ? (
+                                        <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        user.name?.[0]
+                                    )}
                                 </div>
                                 <div className="flex-1 overflow-hidden">
                                     <p className="text-xs font-semibold text-white truncate leading-tight">{user.name}</p>

@@ -135,8 +135,12 @@ export default function Navbar({ onMenuClick }) {
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
           >
-            <div className="h-8 w-8 rounded-lg bg-zinc-950 flex items-center justify-center text-white font-bold text-xs border border-white/10 shadow-inner group-hover:text-brand-400 transition-colors">
-              {user.name?.[0].toUpperCase()}
+            <div className="h-8 w-8 rounded-lg bg-zinc-950 flex items-center justify-center text-white font-bold text-xs border border-white/10 shadow-inner group-hover:text-brand-400 transition-colors overflow-hidden">
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                user.name?.[0].toUpperCase()
+              )}
             </div>
             <ChevronDown size={14} className={`text-zinc-600 group-hover:text-zinc-400 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
           </button>

@@ -10,12 +10,35 @@ const router = express.Router();
 // Get Projects for an Organization (User must be member of Org and Project)
 router.get("/", requireAuth, requireOrgRole("member"), async (req, res) => {
   try {
-    const projects = await Project.find({
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const query = {
       organizationId: req.organization._id,
       members: req.user._id
-    }).sort({ updatedAt: -1 });
-    res.json(projects);
+    };
+
+    const [projects, total] = await Promise.all([
+      Project.find(query)
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Project.countDocuments(query)
+    ]);
+
+    res.json({
+      projects,
+      meta: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch projects" });
   }
 });

@@ -58,8 +58,8 @@ export default function TaskListView({ tasks, onTaskClick, showProject = false }
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center gap-2">
                                         <div className={`w-2 h-2 rounded-full ${task.status === 'done' ? 'bg-emerald-500' :
-                                                task.status === 'review' ? 'bg-indigo-500' :
-                                                    task.status === 'inprogress' ? 'bg-brand-500' : 'bg-zinc-700'
+                                            task.status === 'review' ? 'bg-indigo-500' :
+                                                task.status === 'inprogress' ? 'bg-brand-500' : 'bg-zinc-700'
                                             }`} />
                                         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                                             {task.status}
@@ -69,8 +69,8 @@ export default function TaskListView({ tasks, onTaskClick, showProject = false }
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center gap-1.5">
                                         <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded-md border ${task.priority === 'high' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
-                                                task.priority === 'medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                                                    'bg-zinc-800 text-zinc-500 border-white/5'
+                                            task.priority === 'medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                                'bg-zinc-800 text-zinc-500 border-white/5'
                                             }`}>
                                             {task.priority || 'Medium'}
                                         </span>
@@ -79,8 +79,12 @@ export default function TaskListView({ tasks, onTaskClick, showProject = false }
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex -space-x-1.5">
                                         {(task.assignees || []).map((u, i) => (
-                                            <div key={i} title={u.name} className="w-6 h-6 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-950 flex items-center justify-center text-[9px] font-bold shadow-sm transition-transform group-hover:scale-110">
-                                                {u.name?.[0]?.toUpperCase()}
+                                            <div key={i} title={u.name} className="w-6 h-6 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-950 flex items-center justify-center text-[9px] font-bold shadow-sm transition-transform group-hover:scale-110 overflow-hidden">
+                                                {u.avatarUrl ? (
+                                                    <img src={u.avatarUrl} alt={u.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    u.name?.[0]?.toUpperCase()
+                                                )}
                                             </div>
                                         ))}
                                         {(!task.assignees || task.assignees.length === 0) && (

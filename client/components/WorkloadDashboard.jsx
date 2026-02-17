@@ -14,6 +14,7 @@ export default function WorkloadDashboard({ tasks, members = [] }) {
                 id,
                 name: member.userId?.name || member.name || 'Unknown',
                 email: member.userId?.email || member.email || '',
+                avatarUrl: member.userId?.avatarUrl || member.avatarUrl || '',
                 tasks: [],
                 total: 0,
                 inProgress: 0,
@@ -33,6 +34,7 @@ export default function WorkloadDashboard({ tasks, members = [] }) {
                         id: assigneeId,
                         name: assignee.name || 'Unknown',
                         email: assignee.email || '',
+                        avatarUrl: assignee.avatarUrl || '',
                         tasks: [],
                         total: 0,
                         inProgress: 0,
@@ -160,8 +162,12 @@ export default function WorkloadDashboard({ tasks, members = [] }) {
                                     >
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 border border-zinc-950 flex items-center justify-center text-xs font-semibold shadow-sm transition-all group-hover:scale-110">
-                                                    {member.name?.[0]?.toUpperCase()}
+                                                <div className="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 border border-zinc-950 flex items-center justify-center text-xs font-semibold shadow-sm transition-all group-hover:scale-110 overflow-hidden">
+                                                    {member.avatarUrl ? (
+                                                        <img src={member.avatarUrl} alt={member.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        member.name?.[0]?.toUpperCase()
+                                                    )}
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="text-sm font-semibold text-zinc-200 group-hover:text-white transition-colors truncate max-w-[120px] sm:max-w-[200px]">{member.name}</span>

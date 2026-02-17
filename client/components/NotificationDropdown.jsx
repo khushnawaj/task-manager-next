@@ -61,9 +61,13 @@ export default function NotificationDropdown({ isOpen, onClose }) {
                                         onClick={() => markAsRead(n._id)}
                                         className={`p-4 flex gap-4 transition-all cursor-pointer relative group ${n.read ? 'opacity-60 grayscale-[0.5]' : 'bg-active/10'}`}
                                     >
-                                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border transition-colors ${n.read ? 'bg-zinc-950 border-white/5 text-zinc-600' : 'bg-zinc-950 border-brand-500/20 text-brand-400'
+                                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border transition-colors overflow-hidden ${n.read ? 'bg-zinc-950 border-white/5 text-zinc-600' : 'bg-zinc-950 border-brand-500/20 text-brand-400'
                                             }`}>
-                                            {getIcon(n.type)}
+                                            {n.senderId?.avatarUrl ? (
+                                                <img src={n.senderId.avatarUrl} alt={n.senderId.name} className="h-full w-full object-cover" />
+                                            ) : (
+                                                getIcon(n.type)
+                                            )}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between gap-2">

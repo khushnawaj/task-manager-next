@@ -12,8 +12,12 @@ export default function OrganizationDashboard() {
     const router = useRouter();
     const { id: organizationId } = router.query;
     const { user, initialized } = useSelector(state => state.auth);
+    const [page, setPage] = useState(1);
 
-    const { data: projects = [], isLoading: projectsLoading, error } = useGetProjectsQuery(organizationId, { skip: !organizationId || !initialized });
+    const { data: projectData, isLoading: projectsLoading, error } = useGetProjectsQuery({ organizationId, page }, { skip: !organizationId || !initialized });
+    const projects = projectData?.projects || [];
+    const meta = projectData?.meta;
+
     const { data: orgData } = useGetOrganizationQuery(organizationId, { skip: !organizationId || !initialized });
 
     const [createProject] = useCreateProjectMutation();
@@ -97,7 +101,7 @@ export default function OrganizationDashboard() {
                 </div>
 
                 {/* Project Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                     {projectsLoading ? (
                         [1, 2, 3].map(n => (
                             <div key={n} className="h-64 bg-zinc-900 border border-border rounded-2xl animate-pulse shimmer" />
@@ -171,6 +175,31 @@ export default function OrganizationDashboard() {
                         ))
                     )}
                 </div>
+
+                {/* Pagination */}
+                {meta && meta.pages > 1 && (
+                    <div className="flex justify-between items-center mb-12 bg-zinc-900/50 p-4 rounded-xl border border-border">
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                            Showing Page {meta.page} of {meta.pages}
+                        </span>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                className="p-2 bg-zinc-950 border border-zinc-800 rounded-lg hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-400 transition-all"
+                            >
+                                <ChevronRight size={16} className="rotate-180" />
+                            </button>
+                            <button
+                                onClick={() => setPage(p => Math.min(meta.pages, p + 1))}
+                                disabled={page === meta.pages}
+                                className="p-2 bg-zinc-950 border border-zinc-800 rounded-lg hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-400 transition-all"
+                            >
+                                <ChevronRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Create Project Modal */}
                 <AnimatePresence>

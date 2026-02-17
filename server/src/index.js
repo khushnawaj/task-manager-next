@@ -42,8 +42,18 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+import path from "path";
+import { fileURLToPath } from "url";
+import uploadRoutes from "./routes/upload.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 // Mount routes
 app.use("/api/auth", authRoutes);
+app.use("/api/upload", uploadRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/projects", taskRoutes); // Support /api/projects/:projectId/tasks

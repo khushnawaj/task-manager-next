@@ -125,8 +125,12 @@ export default function TeamPage() {
                                     className="group bg-zinc-900 border border-white/5 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 hover:border-white/10 transition-all duration-300 shadow-premium-sm"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className="h-12 w-12 rounded-xl bg-zinc-950 border border-white/5 flex items-center justify-center text-white font-bold text-sm shadow-inner group-hover:text-brand-400 transition-colors">
-                                            {member.userId?.name?.[0].toUpperCase() || '?'}
+                                        <div className="h-12 w-12 rounded-xl bg-zinc-950 border border-white/5 flex items-center justify-center text-white font-bold text-sm shadow-inner group-hover:text-brand-400 transition-colors overflow-hidden">
+                                            {member.userId?.avatarUrl ? (
+                                                <img src={member.userId.avatarUrl} alt={member.userId.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                member.userId?.name?.[0].toUpperCase() || '?'
+                                            )}
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">

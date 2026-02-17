@@ -56,3 +56,7 @@ logs/
 *.log
 server.log
 server_retry.log
+
+# Uploads
+server/uploads/
+uploads/

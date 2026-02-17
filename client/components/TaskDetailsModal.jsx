@@ -78,8 +78,8 @@ export default function TaskDetailsModal({ task, onClose, onUpdate, onDelete, me
     };
 
     const timeline = [
-        ...comments.map(c => ({ ...c, type: 'comment', timestamp: c.createdAt })),
-        ...auditLogs.map(l => ({ ...l, type: 'audit', timestamp: l.createdAt }))
+        ...comments.map(c => ({ ...c, type: 'comment', user: c.author, timestamp: c.createdAt })),
+        ...auditLogs.map(l => ({ ...l, type: 'audit', user: l.actor, timestamp: l.createdAt }))
     ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     return (
@@ -281,22 +281,25 @@ export default function TaskDetailsModal({ task, onClose, onUpdate, onDelete, me
                                         <div key={index} className="flex gap-3 group/item">
                                             <div className="shrink-0 pt-1">
                                                 <div
-                                                    title={item.author?.name || 'System'}
-                                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm border border-white/5 transition-transform hover:scale-110 cursor-help ${isComment ? 'bg-zinc-800 text-brand-400' : 'bg-zinc-900 text-zinc-500'
+                                                    title={item.user?.name || 'System'}
+                                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm border border-white/5 transition-transform hover:scale-110 cursor-help overflow-hidden ${isComment ? 'bg-zinc-800 text-brand-400' : 'bg-zinc-900 text-zinc-500'
                                                         }`}
                                                 >
-                                                    {isComment && item.author?.name ? item.author.name[0].toUpperCase() :
-                                                        item.action?.includes('create') ? <Plus size={14} /> :
-                                                            item.action?.includes('update') ? <Edit2 size={12} /> :
-                                                                <Activity size={12} />
-                                                    }
+                                                    {item.user?.avatarUrl ? (
+                                                        <img src={item.user.avatarUrl} alt={item.user.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        item.user?.name ? item.user.name[0].toUpperCase() :
+                                                            item.action?.includes('create') ? <Plus size={14} /> :
+                                                                item.action?.includes('update') ? <Edit2 size={12} /> :
+                                                                    <Activity size={12} />
+                                                    )}
                                                 </div>
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-baseline mb-1">
                                                     <div className="flex items-center gap-1.5 overflow-hidden">
                                                         <span className="text-[11px] font-bold text-zinc-300 truncate">
-                                                            {item.author?.name || 'System'}
+                                                            {item.user?.name || 'System'}
                                                         </span>
                                                         <span className="text-[10px] text-zinc-600 truncate">
                                                             {actionText}

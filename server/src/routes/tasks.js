@@ -34,7 +34,7 @@ router.get("/assigned/me", requireAuth, async (req, res, next) => {
   try {
     const tasks = await Task.find({ assignees: req.user._id, deletedAt: null })
       .populate("projectId", "name key")
-      .populate("assignees", "name email")
+      .populate("assignees", "name email avatarUrl")
       .sort({ updatedAt: -1 })
       .limit(50);
     res.json(tasks);
@@ -100,8 +100,28 @@ router.get("/:projectId/tasks", requireAuth, async (req, res, next) => {
   try {
     const { projectId } = req.params;
     await checkAccess(req, projectId);
-    const tasks = await Task.find({ projectId, deletedAt: null }).limit(100).populate("assignees", "name email");
-    res.json(tasks);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
+    const [tasks, total] = await Promise.all([
+      Task.find({ projectId, deletedAt: null })
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("assignees", "name email avatarUrl"),
+      Task.countDocuments({ projectId, deletedAt: null })
+    ]);
+
+    res.json({
+      tasks,
+      meta: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
     if (err.message.includes("Access denied")) return res.status(403).json({ error: err.message });
     next(err);
@@ -113,7 +133,7 @@ router.get("/:id", requireAuth, async (req, res, next) => {
   try {
     const { id } = req.params;
     // Avoid matching "tasks" literal if routing is weird, validates objectId usually
-    const task = await Task.findById(id).populate("assignees", "name email");
+    const task = await Task.findById(id).populate("assignees", "name email avatarUrl");
     if (!task || task.deletedAt) return res.status(404).json({ error: "Not found" });
 
     await checkAccess(req, task.projectId);
@@ -189,7 +209,7 @@ router.get("/:taskId/audit-log", requireAuth, async (req, res, next) => {
   try {
     const { taskId } = req.params;
     const logs = await AuditLog.find({ "meta.taskId": taskId })
-      .populate("actor", "name email")
+      .populate("actor", "name email avatarUrl")
       .sort({ createdAt: -1 })
       .limit(20);
     res.json(logs);

@@ -4,9 +4,14 @@ import toast from 'react-hot-toast';
 export const tasksApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getProjectTasks: builder.query({
-      query: (projectId) => `projects/${projectId}/tasks`,
-      providesTags: (result) =>
-        result ? [...result.map(({ _id }) => ({ type: "Task", id: _id })), { type: "Task", id: "LIST" }] : [{ type: "Task", id: "LIST" }]
+      query: (arg) => {
+        const { projectId, page = 1, limit = 50 } = typeof arg === 'object' ? arg : { projectId: arg };
+        return `projects/${projectId}/tasks?page=${page}&limit=${limit}`;
+      },
+      providesTags: (result) => {
+        const tasks = result?.tasks || [];
+        return [...tasks.map(({ _id }) => ({ type: "Task", id: _id })), { type: "Task", id: "LIST" }];
+      }
     }),
     createTask: builder.mutation({
       query: ({ projectId, ...body }) => ({

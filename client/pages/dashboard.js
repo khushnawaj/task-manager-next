@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
-import { useGetDashboardDataQuery } from '../store/services/userApi';
+import { useGetDashboardDataQuery, useGetRecentActivityQuery } from '../store/services/userApi';
 import { useGetHeatmapQuery } from '../store/services/analyticsApi';
 import ContributionHeatmap from '../components/ContributionHeatmap';
 import { useGetMyOrganizationsQuery } from '../store/services/organizationApi';
@@ -23,9 +24,19 @@ import { motion } from 'framer-motion';
 export default function Dashboard() {
   const { user, initialized } = useSelector((state) => state.auth);
   const router = useRouter();
+
+  const [activityPage, setActivityPage] = useState(1);
+
   const { data: dashboardData, isLoading: statsLoading } = useGetDashboardDataQuery(undefined, {
     skip: !user || !initialized
   });
+
+  const { data: activityData, isLoading: activityLoading } = useGetRecentActivityQuery({ page: activityPage }, {
+    skip: !user || !initialized
+  });
+  const recentActivity = activityData?.activity || [];
+  const activityMeta = activityData?.meta;
+
   const { data: organizations = [], isLoading: orgsLoading } = useGetMyOrganizationsQuery(undefined, {
     skip: !user || !initialized
   });
@@ -149,8 +160,12 @@ export default function Dashboard() {
                     <div className="mt-12 flex items-center justify-between">
                       <div className="flex -space-x-1.5 overflow-hidden">
                         {(org.members || []).slice(0, 3).map((m, idx) => (
-                          <div key={idx} title={m.userId?.name} className="inline-block h-6 w-6 rounded-full ring-2 ring-zinc-900 bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-400 border border-white/5 shadow-inner">
-                            {m.userId?.name?.[0].toUpperCase() || '?'}
+                          <div key={idx} title={m.userId?.name} className="inline-block h-6 w-6 rounded-full ring-2 ring-zinc-900 bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-400 border border-white/5 shadow-inner overflow-hidden">
+                            {m.userId?.avatarUrl ? (
+                              <img src={m.userId.avatarUrl} alt={m.userId.name} className="w-full h-full object-cover" />
+                            ) : (
+                              m.userId?.name?.[0].toUpperCase() || '?'
+                            )}
                           </div>
                         ))}
                         {org.members?.length > 3 && (
@@ -191,18 +206,46 @@ export default function Dashboard() {
 
         {/* Global Activity / Timeline Mock */}
         <section className="mt-16 pt-16 border-t border-border">
-          <div className="flex items-center gap-2 mb-8">
-            <TrendingUp size={16} className="text-zinc-500" />
-            <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest">Recent Activity</h2>
+          <div className="flex items-center justify-between gap-2 mb-8">
+            <div className="flex items-center gap-2">
+              <TrendingUp size={16} className="text-zinc-500" />
+              <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest">Recent Activity</h2>
+            </div>
+            {/* Pagination Controls */}
+            {activityMeta && activityMeta.pages > 1 && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setActivityPage((p) => Math.max(1, p - 1))}
+                  disabled={activityPage === 1}
+                  className="p-1.5 rounded-lg border border-border text-zinc-500 hover:text-white hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronRight size={14} className="rotate-180" />
+                </button>
+                <span className="text-[10px] font-bold text-zinc-600 self-center uppercase tracking-widest px-2">
+                  {activityMeta.page} / {activityMeta.pages}
+                </span>
+                <button
+                  onClick={() => setActivityPage((p) => Math.min(activityMeta.pages, p + 1))}
+                  disabled={activityPage === activityMeta.pages}
+                  className="p-1.5 rounded-lg border border-border text-zinc-500 hover:text-white hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            )}
           </div>
           <div className="bg-zinc-900 border border-border rounded-2xl overflow-hidden shadow-premium-md">
-            {isLoading ? (
+            {activityLoading ? (
               <div className="p-8 text-center text-zinc-500 font-medium animate-pulse">Synchronizing activity stream...</div>
-            ) : dashboardData?.recentActivity?.length > 0 ? (
-              dashboardData.recentActivity.map((log, i) => (
-                <div key={log._id} className={`flex items-center gap-4 p-4 hover:bg-zinc-800/50 transition-colors cursor-default ${i !== dashboardData.recentActivity.length - 1 ? 'border-b border-border' : ''}`}>
-                  <div className="w-8 h-8 rounded-full bg-active border border-border flex items-center justify-center text-[10px] font-bold text-white shadow-inner">
-                    {log.actor?.name?.[0].toUpperCase() || 'S'}
+            ) : recentActivity?.length > 0 ? (
+              recentActivity.map((log, i) => (
+                <div key={log._id} className={`flex items-center gap-4 p-4 hover:bg-zinc-800/50 transition-colors cursor-default ${i !== recentActivity.length - 1 ? 'border-b border-border' : ''}`}>
+                  <div className="w-8 h-8 rounded-full bg-active border border-border flex items-center justify-center text-[10px] font-bold text-white shadow-inner overflow-hidden">
+                    {log.actor?.avatarUrl ? (
+                      <img src={log.actor.avatarUrl} alt={log.actor.name} className="w-full h-full object-cover" />
+                    ) : (
+                      log.actor?.name?.[0].toUpperCase() || 'S'
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-semibold text-zinc-200">
