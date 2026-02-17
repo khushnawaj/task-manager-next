@@ -16,6 +16,9 @@ import taskRoutes from "./routes/tasks.js";
 import adminRoutes from "./routes/admin.js";
 import userRoutes from "./routes/users.js";
 import invitationRoutes from "./routes/invitations.js";
+import searchRoutes from "./routes/search.js";
+import notificationRoutes from "./routes/notifications.js";
+import analyticsRoutes from "./routes/analytics.js";
 
 dotenv.config();
 
@@ -50,6 +53,9 @@ app.use("/api/billing", billingRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/invitations", invitationRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Connect DB and start server
 mongoose.connect(process.env.MONGODB_URI, {})

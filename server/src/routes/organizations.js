@@ -1,9 +1,10 @@
 import express from "express";
 import { requireAuth, requireOrgRole } from "../middleware/auth.js";
-import { getOrganization, updateMemberRole, removeMember } from "../controllers/organizationController.js";
+import { getOrganization, updateMemberRole, removeMember, getMyOrganizations } from "../controllers/organizationController.js";
 
 const router = express.Router();
 
+router.get("/", requireAuth, getMyOrganizations);
 router.get("/:id", requireAuth, getOrganization);
 
 // Manage Roles (Manager+)

@@ -4,6 +4,7 @@ import Task from "../models/Task.js";
 import Project from "../models/Project.js";
 import Organization from "../models/Organization.js";
 import AuditLog from "../models/AuditLog.js";
+import Notification from "../models/Notification.js";
 import { ioRef } from "../socket.js";
 
 const router = express.Router({ mergeParams: true });
@@ -71,6 +72,21 @@ router.post("/:projectId/tasks", requireAuth, async (req, res, next) => {
     });
 
     ioRef?.to(`project:${projectId}`).emit("task:created", { task });
+
+    // Notify Assignees
+    if (task.assignees?.length > 0) {
+      const notifications = task.assignees.map(userId => ({
+        userId,
+        senderId: req.user._id,
+        type: "assignment",
+        title: "New Task Assignment",
+        message: `You have been assigned to: ${title}`,
+        entityId: task._id,
+        entityType: "task"
+      }));
+      await Notification.insertMany(notifications);
+    }
+
     res.status(201).json(task);
   } catch (err) {
     if (err.message.includes("Access denied")) return res.status(403).json({ error: err.message });

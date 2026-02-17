@@ -2,114 +2,155 @@ import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Layout from '../components/Layout';
 import { useUpdateProfileMutation } from '../store/services/userApi';
-import { setCredentials } from '../store/slices/authSlice';
+import { setAuth } from '../store/slices/authSlice';
+import { User, Mail, Shield, Save, Check, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+import { useRouter } from 'next/router';
 
 export default function Profile() {
-    const { user, token } = useSelector(state => state.auth);
+    const { user, token, initialized } = useSelector(state => state.auth);
+    const router = useRouter();
     const dispatch = useDispatch();
 
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || ''); // Read only
 
     const [updateProfile, { isLoading }] = useUpdateProfileMutation();
-    const [message, setMessage] = useState('');
+    const [status, setStatus] = useState({ type: '', message: '' });
 
     useEffect(() => {
-        if (user) {
+        if (initialized && !user) {
+            router.push('/login');
+        } else if (user) {
             setName(user.name);
             setEmail(user.email);
         }
-    }, [user]);
+    }, [user, initialized, router]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const result = await updateProfile({ name }).unwrap();
-            // Update Redux State manually since token is same
-            dispatch(setCredentials({ user: result.user, accessToken: token }));
-            setMessage('Profile updated successfully!');
-            setTimeout(() => setMessage(''), 3000);
+            dispatch(setAuth({ user: result.user, token }));
+            setStatus({ type: 'success', message: 'Infrastructure settings synchronized.' });
+            setTimeout(() => setStatus({ type: '', message: '' }), 3000);
         } catch (err) {
             console.error(err);
-            setMessage('Failed to update profile');
+            setStatus({ type: 'error', message: 'Synchronization protocol failed.' });
+            setTimeout(() => setStatus({ type: '', message: '' }), 3000);
         }
     };
 
-    if (!user) return null;
+    if (!initialized || !user) return null;
 
     return (
-        <Layout title="Your Profile">
-            <div className="max-w-2xl mx-auto px-4 py-8">
-                <div className="bg-white shadow rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-xl font-bold text-gray-900">Profile Settings</h2>
-                        <p className="text-sm text-gray-500">Update your personal information.</p>
+        <Layout title="User Profile">
+            <div className="max-w-2xl mx-auto px-4 py-12">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-zinc-900 border border-border rounded-2xl shadow-premium-xl overflow-hidden"
+                >
+                    {/* Header Strip */}
+                    <div className="px-8 py-6 border-b border-border bg-active/20 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-xl font-bold text-white tracking-tight">Identity & Access</h2>
+                            <p className="text-xs font-medium text-zinc-500 mt-1 uppercase tracking-widest">Personal node configuration</p>
+                        </div>
+                        <div className="h-10 w-10 rounded-xl bg-zinc-950 border border-white/5 flex items-center justify-center text-zinc-600">
+                            <Save size={20} />
+                        </div>
                     </div>
 
-                    <div className="p-6">
-                        <div className="flex items-center gap-6 mb-8">
-                            <div className="h-20 w-20 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-bold text-3xl border border-brand-200">
-                                {user.name.charAt(0).toUpperCase()}
+                    <div className="p-8">
+                        <div className="flex items-center gap-8 mb-12">
+                            <div className="h-24 w-24 rounded-2xl bg-zinc-950 border border-border flex items-center justify-center text-brand-500 font-bold text-4xl shadow-inner relative group overflow-hidden">
+                                <div className="absolute inset-0 bg-brand-500/5 group-hover:bg-brand-500/10 transition-colors" />
+                                <span className="relative z-10">{user.name.charAt(0).toUpperCase()}</span>
                             </div>
                             <div>
-                                <h3 className="text-lg font-medium text-gray-900">{user.name}</h3>
-                                <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+                                <h3 className="text-2xl font-bold text-white tracking-tight">{user.name}</h3>
+                                <div className="flex items-center gap-2 mt-1.5 px-3 py-1 rounded-full bg-zinc-800 border border-white/5 w-fit">
+                                    <Shield size={12} className="text-brand-400" />
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{user.role}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                        <form onSubmit={handleSubmit} className="space-y-8">
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">
+                                    <User size={12} /> Full Name
+                                </label>
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm p-2 border"
+                                    className="input-field py-2.5 text-base"
+                                    placeholder="Engineer Name"
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    readOnly
-                                    disabled
-                                    className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 text-gray-500 shadow-sm sm:text-sm p-2 border cursor-not-allowed"
-                                />
-                                <p className="mt-1 text-xs text-gray-400">Email cannot be changed.</p>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Role</label>
-                                <input
-                                    type="text"
-                                    value={user.role}
-                                    readOnly
-                                    disabled
-                                    className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 text-gray-500 shadow-sm sm:text-sm p-2 border cursor-not-allowed capitalize"
-                                />
-                            </div>
-
-                            {message && (
-                                <div className={`p-3 rounded text-sm ${message.includes('Success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                                    {message}
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">
+                                    <Mail size={12} /> Communication Endpoint
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        readOnly
+                                        className="input-field py-2.5 text-base bg-zinc-950/50 text-zinc-500 border-dashed cursor-not-allowed opacity-80"
+                                    />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[9px] font-bold text-zinc-600 uppercase">
+                                        Locked
+                                        <Save size={10} />
+                                    </div>
                                 </div>
-                            )}
+                            </div>
 
-                            <div className="flex justify-end pt-4">
+                            <AnimatePresence>
+                                {status.message && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className={`flex items-center gap-3 p-4 rounded-xl border ${status.type === 'success'
+                                            ? 'bg-success/10 border-success/20 text-success'
+                                            : 'bg-danger/10 border-danger/20 text-danger'
+                                            }`}
+                                    >
+                                        <div className={`p-1.5 rounded-lg ${status.type === 'success' ? 'bg-success/20' : 'bg-danger/20'}`}>
+                                            {status.type === 'success' ? <Check size={14} /> : <Info size={14} />}
+                                        </div>
+                                        <span className="text-sm font-semibold tracking-tight">{status.message}</span>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            <div className="flex justify-end pt-4 border-t border-border">
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50"
-                                    style={{ backgroundColor: 'var(--color-primary)' }}
+                                    className="btn-primary h-12 px-10 text-sm font-bold shadow-brand-500/20"
                                 >
-                                    {isLoading ? 'Saving...' : 'Save Changes'}
+                                    {isLoading ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Synchronizing...
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <Save size={16} />
+                                            Save Parameters
+                                        </div>
+                                    )}
                                 </button>
                             </div>
                         </form>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </Layout>
     );

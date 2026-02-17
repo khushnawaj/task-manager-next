@@ -5,22 +5,24 @@ import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../../../components/Layout';
-import { Folder, ChevronRight, Plus, Calendar, User, AlignLeft, Hash, Activity } from 'lucide-react';
+import { Folder, ChevronRight, Plus, Calendar, User, AlignLeft, Hash, Activity, Shield, X, MoreVertical, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OrganizationDashboard() {
     const router = useRouter();
     const { id: organizationId } = router.query;
-    const { user } = useSelector(state => state.auth);
+    const { user, initialized } = useSelector(state => state.auth);
 
-    const { data: projects = [], isLoading: projectsLoading, error } = useGetProjectsQuery(organizationId, { skip: !organizationId });
-    const { data: orgData } = useGetOrganizationQuery(organizationId, { skip: !organizationId });
+    const { data: projects = [], isLoading: projectsLoading, error } = useGetProjectsQuery(organizationId, { skip: !organizationId || !initialized });
+    const { data: orgData } = useGetOrganizationQuery(organizationId, { skip: !organizationId || !initialized });
 
     const [createProject] = useCreateProjectMutation();
-
-    // Modal State
     const [isCreating, setIsCreating] = useState(false);
 
-    // Form State
+    useEffect(() => {
+        if (initialized && !user) router.push('/login');
+    }, [user, initialized, router]);
+
     const [formData, setFormData] = useState({
         name: "",
         key: "",
@@ -36,19 +38,7 @@ export default function OrganizationDashboard() {
         }
     }, [user, isCreating]);
 
-    // Auto-generate key
-    const handleNameChange = (e) => {
-        const name = e.target.value;
-        const generated = name.replace(/[^a-zA-Z0-9]/g, "").substring(0, 3).toUpperCase();
-
-        setFormData(prev => ({
-            ...prev,
-            name,
-            key: (prev.key === "" || prev.key.length < 3) ? generated : prev.key
-        }));
-    };
-
-    const handleCreate = async (e) => {
+    const handleCreated = async (e) => {
         e.preventDefault();
         if (!formData.name.trim() || !formData.key.trim()) return;
         try {
@@ -56,237 +46,232 @@ export default function OrganizationDashboard() {
                 ...formData,
                 organizationId
             }).unwrap();
-            setFormData({ name: "", key: "", description: "", startDate: "", endDate: "", leadId: user._id });
+            setFormData({ name: "", key: "", description: "", startDate: "", endDate: "", leadId: user?._id });
             setIsCreating(false);
         } catch (err) {
             console.error(err);
-            alert("Failed to create project. Key might be duplicate.");
         }
     };
 
-    if (!user) return null;
+    const handleNameChange = (e) => {
+        const name = e.target.value;
+        const generated = name.replace(/[^a-zA-Z0-9]/g, "").substring(0, 3).toUpperCase();
+        setFormData(prev => ({
+            ...prev,
+            name,
+            key: (prev.key === "" || prev.key.length < 3) ? generated : prev.key
+        }));
+    };
+
+    if (!initialized || !user) return null;
 
     return (
-        <Layout title="Workspace">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-6 border-b border-brand-200">
+        <Layout title="Projects">
+            <div className="max-w-6xl mx-auto">
+                {/* Breadcrumbs & Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <Link href="/dashboard" className="text-sm font-medium text-brand-500 hover:text-brand-900 transition-colors">
-                                Workspaces
-                            </Link>
-                            <span className="text-brand-300">/</span>
-                            <span className="text-sm font-medium text-brand-900">Projects</span>
+                        <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-widest text-zinc-500">
+                            <Link href="/dashboard" className="hover:text-zinc-300 transition-colors">Dashboard</Link>
+                            <ChevronRight size={12} className="text-zinc-700" />
+                            <span className="text-zinc-400">Projects</span>
                         </div>
-                        <h1 className="text-3xl font-display font-semibold text-brand-900">Projects</h1>
-                        <p className="text-brand-500 mt-1">Manage your team's initiatives and tasks.</p>
+                        <h1 className="text-4xl font-bold text-zinc-50 tracking-tight">
+                            {orgData?.organization?.name || 'Projects'}
+                        </h1>
+                        <p className="text-zinc-500 mt-1 text-sm font-medium">
+                            Manage and organize your project portfolio here.
+                        </p>
                     </div>
 
-                    <div className="mt-4 sm:mt-0 flex gap-3">
-                        <Link
-                            href={`/organizations/${organizationId}/team`}
-                            className="btn-secondary flex items-center gap-2"
-                        >
-                            <User size={16} /> Team
+                    <div className="flex gap-3">
+                        <Link href={`/organizations/${organizationId}/team`} className="btn-secondary">
+                            <User size={16} />
+                            Team
                         </Link>
-                        <button
-                            onClick={() => setIsCreating(true)}
-                            className="btn-primary flex items-center gap-2"
-                        >
-                            <Plus size={16} /> New Project
+                        <button onClick={() => setIsCreating(true)} className="btn-primary">
+                            <Plus size={16} strokeWidth={2.5} />
+                            Create Project
                         </button>
                     </div>
                 </div>
 
-                {/* Create Project Modal */}
-                {isCreating && (
-                    <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={() => setIsCreating(false)}></div>
-                            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                                <div className="sm:flex sm:items-start">
-                                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                        <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center gap-2" id="modal-title">
-                                            <Folder size={20} className="text-brand-500" /> Create New Project
-                                        </h3>
-                                        <div className="mt-4">
-                                            <form onSubmit={handleCreate} className="space-y-4">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
-                                                        Project Name <span className="text-red-500">*</span>
-                                                    </label>
-                                                    <div className="mt-1 relative rounded-md shadow-sm">
-                                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                            <Folder size={14} className="text-gray-400" />
-                                                        </div>
-                                                        <input
-                                                            value={formData.name}
-                                                            onChange={handleNameChange}
-                                                            className="block w-full pl-10 border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm p-2 border"
-                                                            placeholder="e.g. Q4 Marketing"
-                                                            required
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
-                                                            Key <Hash size={12} />
-                                                        </label>
-                                                        <input
-                                                            value={formData.key}
-                                                            onChange={(e) => setFormData({ ...formData, key: e.target.value.toUpperCase() })}
-                                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-brand-500 focus:border-brand-500 uppercase font-mono"
-                                                            placeholder="Q4M"
-                                                            required
-                                                            maxLength={5}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
-                                                            Lead <User size={12} />
-                                                        </label>
-                                                        <select
-                                                            value={formData.leadId}
-                                                            onChange={(e) => setFormData({ ...formData, leadId: e.target.value })}
-                                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
-                                                        >
-                                                            {orgData?.organization?.members.map(m => (
-                                                                <option key={m.userId?._id} value={m.userId?._id}>{m.userId?.name}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
-                                                        Description <AlignLeft size={12} />
-                                                    </label>
-                                                    <textarea
-                                                        value={formData.description}
-                                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                                        rows={3}
-                                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
-                                                    />
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
-                                                            Start Date
-                                                        </label>
-                                                        <input
-                                                            type="date"
-                                                            value={formData.startDate}
-                                                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
-                                                            End Date
-                                                        </label>
-                                                        <input
-                                                            type="date"
-                                                            value={formData.endDate}
-                                                            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-brand-500 focus:border-brand-500"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
-                                                    <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-brand-600 text-base font-medium text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:w-auto sm:text-sm">
-                                                        Create Project
-                                                    </button>
-                                                    <button type="button" onClick={() => setIsCreating(false)} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:mt-0 sm:w-auto sm:text-sm">
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 {/* Project Grid */}
-                {projectsLoading ? (
-                    <div className="flex justify-center py-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
-                    </div>
-                ) : error ? (
-                    <div className="text-center py-20 bg-red-50 rounded-xl border border-red-100">
-                        <p className="text-red-600 font-medium">Unable to load projects.</p>
-                        <p className="text-red-500 text-sm mt-1">Please check your permissions or network connection.</p>
-                    </div>
-                ) : projects.length === 0 ? (
-                    <div className="text-center py-24 bg-brand-50/50 rounded-xl border border-dashed border-brand-300">
-                        <div className="mx-auto h-12 w-12 text-brand-400 mb-3 flex items-center justify-center">
-                            <Folder size={48} strokeWidth={1} />
-                        </div>
-                        <h3 className="mt-2 text-sm font-medium text-brand-900">No projects</h3>
-                        <p className="mt-1 text-sm text-brand-500">Get started by creating a new project.</p>
-                        <div className="mt-6">
-                            <button onClick={() => setIsCreating(true)} className="btn-secondary mx-auto w-auto flex items-center gap-2">
-                                <Plus size={16} /> Create Project
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {projectsLoading ? (
+                        [1, 2, 3].map(n => (
+                            <div key={n} className="h-64 bg-zinc-900 border border-border rounded-2xl animate-pulse shimmer" />
+                        ))
+                    ) : projects.length === 0 ? (
+                        <div className="col-span-full py-32 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-3xl bg-zinc-900/50">
+                            <Folder size={48} className="text-zinc-700 mb-6" strokeWidth={1.5} />
+                            <h3 className="text-xl font-bold text-zinc-300">No projects yet</h3>
+                            <p className="text-zinc-500 text-sm mt-1 mb-8 max-w-xs text-center font-medium">
+                                Start by creating a project to organize tasks and collaborate with your team.
+                            </p>
+                            <button onClick={() => setIsCreating(true)} className="btn-primary">
+                                Create your first project
                             </button>
                         </div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {projects.map(project => (
+                    ) : (
+                        projects.map((project, i) => (
                             <Link key={project._id} href={`/organizations/${organizationId}/projects/${project._id}`}>
-                                <div className="group bg-white border border-brand-200 rounded-xl p-6 hover:shadow-md hover:border-brand-300 transition-all cursor-pointer h-full flex flex-col justify-between">
-                                    <div>
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="h-10 w-10 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center border border-brand-100 font-bold">
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.98 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="group relative p-7 bg-zinc-900 border border-border rounded-2xl hover:border-brand-500/50 hover:shadow-premium-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-full"
+                                >
+                                    <div className="flex justify-between items-start mb-8">
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-12 w-12 bg-zinc-950 border border-white/5 rounded-xl flex items-center justify-center font-bold text-zinc-400 group-hover:text-brand-400 group-hover:bg-zinc-900 transition-all duration-300 shadow-inner">
                                                 {project.key || project.name[0]}
                                             </div>
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity text-brand-400">
-                                                <ChevronRight size={20} />
+                                            <div>
+                                                <h3 className="text-lg font-bold text-zinc-100 tracking-tight leading-tight group-hover:text-white transition-colors">{project.name}</h3>
+                                                <p className="text-xs font-medium text-zinc-500 mt-0.5">{project.key}</p>
                                             </div>
                                         </div>
-                                        <h3 className="text-lg font-semibold text-brand-900 mb-2 group-hover:text-brand-600 transition-colors">
-                                            {project.name}
-                                        </h3>
-                                        <p className="text-sm text-brand-500 line-clamp-2">
-                                            {project.description || "No description provided."}
-                                        </p>
+                                        <button className="text-zinc-600 hover:text-zinc-400 transition-colors p-1">
+                                            <MoreVertical size={16} />
+                                        </button>
                                     </div>
 
-                                    <div className="mt-6 pt-4 border-t border-brand-100 flex items-center justify-between">
-                                        <span className={`text-[10px] px-2 py-0.5 rounded border capitalize flex items-center gap-1 ${!project.status || project.status === 'active' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-500'}`}>
-                                            <Activity size={10} /> {project.status || 'Active'}
-                                        </span>
-                                        <div className="flex -space-x-2">
-                                            <div className="w-6 h-6 rounded-full bg-brand-200 border-2 border-white flex items-center justify-center text-[10px] text-brand-600 font-medium">
-                                                {user.name[0]}
+                                    <p className="text-sm text-zinc-500 font-medium leading-relaxed line-clamp-2 mb-10 flex-1">
+                                        {project.description || "Project management and task orchestration."}
+                                    </p>
+
+                                    <div className="pt-6 border-t border-border flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_5px_currentColor]" />
+                                                Active
                                             </div>
-                                            {(project.members?.length > 1) && (
-                                                <div className="w-6 h-6 rounded-full bg-brand-100 border-2 border-white flex items-center justify-center text-[10px] text-brand-500 font-medium">
-                                                    +{project.members.length - 1}
+                                            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                                                <AlignLeft size={12} />
+                                                {project.tasks?.length || 0} Tasks
+                                            </div>
+                                        </div>
+
+                                        <div className="flex -space-x-1.5">
+                                            {[1, 2].map((_, idx) => (
+                                                <div key={idx} className="h-6 w-6 rounded-full ring-2 ring-zinc-900 bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-400 border border-white/5">
+                                                    {String.fromCharCode(65 + idx)}
                                                 </div>
-                                            )}
+                                            ))}
                                         </div>
                                     </div>
-                                </div>
+
+                                    {/* Hover Arrow */}
+                                    <div className="absolute top-7 right-7 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                                        <ArrowRight size={16} className="text-brand-500" />
+                                    </div>
+                                </motion.div>
                             </Link>
-                        ))}
-                    </div>
-                )}
+                        ))
+                    )}
+                </div>
+
+                {/* Create Project Modal */}
+                <AnimatePresence>
+                    {isCreating && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                                onClick={() => setIsCreating(false)}
+                            />
+
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                                className="relative w-full max-w-xl bg-zinc-950 border border-border-strong rounded-3xl shadow-premium-xl overflow-hidden"
+                            >
+                                <div className="p-8 border-b border-border flex justify-between items-center">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-zinc-50 tracking-tight">Create Project</h2>
+                                        <p className="text-zinc-500 text-sm font-medium mt-1">Initialize a new project workspace.</p>
+                                    </div>
+                                    <button onClick={() => setIsCreating(false)} className="text-zinc-500 hover:text-zinc-100 transition-colors p-2 hover:bg-zinc-900 rounded-xl">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleCreated} className="p-8 space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2 ml-1">Project Name</label>
+                                            <input
+                                                autoFocus
+                                                value={formData.name}
+                                                onChange={handleNameChange}
+                                                className="input-field"
+                                                placeholder="Forge Infrastructure"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2 ml-1">Key</label>
+                                            <input
+                                                value={formData.key}
+                                                onChange={(e) => setFormData({ ...formData, key: e.target.value.toUpperCase() })}
+                                                className="input-field font-mono uppercase"
+                                                placeholder="NEX"
+                                                required
+                                                maxLength={5}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2 ml-1">Lead</label>
+                                        <div className="relative">
+                                            <select
+                                                value={formData.leadId}
+                                                onChange={(e) => setFormData({ ...formData, leadId: e.target.value })}
+                                                className="input-field appearance-none"
+                                            >
+                                                {orgData?.organization?.members.map(m => (
+                                                    <option key={m.userId?._id} value={m.userId?._id} className="bg-zinc-950 text-white">{m.userId?.name}</option>
+                                                ))}
+                                            </select>
+                                            <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 rotate-90 pointer-events-none" />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2 ml-1">Description</label>
+                                        <textarea
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                            rows={3}
+                                            className="input-field resize-none h-24"
+                                            placeholder="Write a brief overview of the project objectives..."
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-4 pt-6">
+                                        <button type="button" onClick={() => setIsCreating(false)} className="btn-secondary flex-1">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="btn-primary flex-1">
+                                            Create Project
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </div>
         </Layout>
     );
 }
 
-// Enable SSR for authenticated routes
 export async function getServerSideProps() {
     return { props: {} };
 }

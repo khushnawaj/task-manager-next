@@ -59,3 +59,17 @@ export const removeMember = async (req, res) => {
     res.status(500).json({ error: "Failed to remove member" });
   }
 };
+
+// Get user's Organizations
+export const getMyOrganizations = async (req, res) => {
+  try {
+    const orgs = await Organization.find({ "members.userId": req.user._id })
+      .populate("members.userId", "name email")
+      .select("name slug plan members")
+      .sort({ updatedAt: -1 });
+
+    res.json(orgs);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch organizations" });
+  }
+};

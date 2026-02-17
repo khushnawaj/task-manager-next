@@ -16,12 +16,13 @@ import { toast } from 'react-hot-toast';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
     Plus, User as UserIcon, MoreHorizontal, ArrowLeft,
-    Layout as LayoutIcon, Kanban, List, Clock, User, BarChart2
+    Layout as LayoutIcon, Kanban, List, Clock, User, BarChart2, Shield, Search, Filter, Settings, ChevronRight
 } from 'lucide-react';
 import TaskDetailsModal from '../../../../components/TaskDetailsModal';
 import TaskListView from '../../../../components/TaskListView';
 import ProjectDashboard from '../../../../components/ProjectDashboard';
 import WorkloadDashboard from '../../../../components/WorkloadDashboard';
+import { motion } from 'framer-motion';
 import {
     PRIORITY_COLORS,
     TYPE_ICONS,
@@ -33,19 +34,24 @@ import {
 
 const TaskColumn = ({ title, status, tasks, onTaskClick, children }) => {
     return (
-        <div className={`flex-1 min-w-[300px] max-w-[350px] flex flex-col h-full max-h-full rounded-xl bg-gray-50/50 border border-transparent`}>
+        <div className="flex-1 min-w-[320px] max-w-[360px] flex flex-col h-full bg-zinc-900/30 rounded-2xl border border-border/50 backdrop-blur-sm">
             {/* Column Header */}
-            <div className="flex justify-between items-center mb-3 px-3 py-3">
-                <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-brand-900 text-sm tracking-tight">{title}</h3>
-                    <span className="bg-white border border-brand-200 text-xs px-2 py-0.5 rounded-full text-brand-500 font-medium shadow-xs">{tasks.length}</span>
+            <div className="flex justify-between items-center px-4 py-3 sticky top-0 z-10 bg-zinc-900/80 backdrop-blur-md rounded-t-2xl border-b border-border/50">
+                <div className="flex items-center gap-2.5">
+                    <h3 className="font-semibold text-zinc-400 text-[11px] tracking-[0.1em] uppercase">{title}</h3>
+                    <span className="text-[10px] bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded-md font-semibold tabular-nums border border-white/5">{tasks.length}</span>
                 </div>
-                <button className="text-gray-400 hover:text-gray-600">
-                    <MoreHorizontal size={16} />
-                </button>
+                <div className="flex items-center gap-1">
+                    <button className="text-zinc-600 hover:text-zinc-400 p-1 rounded-md hover:bg-zinc-800 transition-all">
+                        <Plus size={14} />
+                    </button>
+                    <button className="text-zinc-600 hover:text-zinc-400 p-1 rounded-md hover:bg-zinc-800 transition-all">
+                        <MoreHorizontal size={14} />
+                    </button>
+                </div>
             </div>
 
-            <div className="px-3 pb-3 flex-1 flex flex-col overflow-hidden">
+            <div className="p-3 flex-1 flex flex-col overflow-hidden">
                 {children}
 
                 <Droppable droppableId={status}>
@@ -53,7 +59,7 @@ const TaskColumn = ({ title, status, tasks, onTaskClick, children }) => {
                         <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className={`flex-1 overflow-y-auto pr-1 space-y-3 transition-colors rounded-lg ${snapshot.isDraggingOver ? 'bg-brand-100/50' : ''}`}
+                            className={`flex-1 overflow-y-auto custom-scrollbar space-y-3 transition-colors duration-200 p-1 rounded-xl ${snapshot.isDraggingOver ? 'bg-brand-500/5' : ''}`}
                         >
                             {tasks.map((task, index) => (
                                 <Draggable key={task._id} draggableId={task._id} index={index}>
@@ -63,72 +69,65 @@ const TaskColumn = ({ title, status, tasks, onTaskClick, children }) => {
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
                                             onClick={() => onTaskClick(task)}
-                                            className={`group bg-white p-3 rounded-lg border shadow-sm hover:shadow-md transition-all cursor-pointer
-                                                ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-brand-200 border-brand-300 z-50' : 'border-brand-200'}
+                                            className={`group bg-zinc-900 border border-border rounded-xl p-4 transition-all duration-200 cursor-pointer 
+                                                ${snapshot.isDragging ? 'shadow-premium-xl scale-[1.03] border-brand-500/50 rotate-1 bg-zinc-800' : 'hover:border-zinc-700 hover:bg-zinc-900/80 shadow-premium-sm'}
                                             `}
                                             style={provided.draggableProps.style}
                                         >
-                                            {/* Minimal Header: Type & Priority (if high) */}
-                                            <div className="flex justify-between items-start mb-1.5">
+                                            <div className="flex justify-between items-start mb-3">
                                                 <div className="flex items-center gap-2">
-                                                    {TYPE_ICONS[task.type || 'task']}
-                                                    <span className="text-xs text-gray-400 font-mono">#{task._id.slice(-4)}</span>
+                                                    <div className="text-zinc-500 group-hover:text-brand-400 transition-colors">
+                                                        {TYPE_ICONS[task.type || 'task']}
+                                                    </div>
+                                                    <span className="text-[9px] text-zinc-600 font-mono group-hover:text-zinc-500 uppercase tracking-tighter">#{task._id.slice(-6).toUpperCase()}</span>
                                                 </div>
-                                                {task.priority && task.priority !== 'medium' && (
-                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded border capitalize ${PRIORITY_COLORS[task.priority]}`}>
-                                                        {task.priority}
-                                                    </span>
+                                                {task.priority && (
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${task.priority === 'high' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]' :
+                                                        task.priority === 'medium' ? 'bg-amber-500' : 'bg-success'
+                                                        }`} />
                                                 )}
                                             </div>
 
-                                            <h4 className="font-medium text-brand-900 text-sm leading-snug mb-2">{task.title}</h4>
+                                            <h4 className="font-semibold text-zinc-100 text-sm leading-snug mb-3 group-hover:text-white transition-colors tracking-tight line-clamp-2">{task.title}</h4>
 
                                             {/* Subtasks Progress */}
                                             {task.subtasks && task.subtasks.length > 0 && (
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-brand-400 rounded-full"
-                                                            style={{ width: `${(task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100}%` }}
-                                                        ></div>
+                                                <div className="space-y-2 mb-4">
+                                                    <div className="flex justify-between items-center text-[10px] font-semibold text-zinc-600">
+                                                        <span>Progress</span>
+                                                        <span>{Math.round((task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100)}%</span>
                                                     </div>
-                                                    <span className="text-[10px] text-gray-400 font-mono">
-                                                        {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length}
-                                                    </span>
+                                                    <div className="h-1 bg-zinc-800 rounded-full overflow-hidden border border-white/5">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${(task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100}%` }}
+                                                            transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                                                            className="h-full bg-brand-500 rounded-full"
+                                                        />
+                                                    </div>
                                                 </div>
                                             )}
 
-                                            {/* Tags */}
-                                            {task.tags && task.tags.length > 0 && (
-                                                <div className="flex flex-wrap gap-1 mb-2">
-                                                    {task.tags.map((tag, i) => (
-                                                        <span key={i} className="text-[10px] px-1.5 py-0.5 bg-gray-50 border border-gray-100 text-gray-500 rounded-md">
-                                                            {tag}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            {/* Footer: Date & Assignee */}
-                                            <div className="flex justify-between items-center mt-2 border-t border-dashed border-gray-100 pt-2">
-                                                <div className="flex items-center gap-3">
+                                            {/* Card Footer */}
+                                            <div className="flex justify-between items-center mt-auto pt-3 border-t border-border/50">
+                                                <div className="flex items-center gap-2.5">
                                                     {task.dueDate && (
-                                                        <div className={`flex items-center gap-1 text-[10px] ${isOverdue(task.dueDate) && status !== 'done' ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
-                                                            <Clock size={12} />
-                                                            {formatDate(task.dueDate)}
+                                                        <div className={`flex items-center gap-1 text-[10px] font-semibold ${isOverdue(task.dueDate) && status !== 'done' ? 'text-rose-500' : 'text-zinc-500'}`}>
+                                                            <Clock size={12} strokeWidth={2.5} />
+                                                            {formatDate(task.dueDate).toUpperCase()}
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 <div className="flex -space-x-1">
-                                                    {(task.assignees || []).map((u, i) => (
-                                                        <div key={i} title={u.name} className="w-5 h-5 rounded-full bg-brand-100 border border-white flex items-center justify-center text-[9px] text-brand-600 font-bold">
-                                                            {u.name?.[0]}
+                                                    {(task.assignees || []).slice(0, 2).map((u, i) => (
+                                                        <div key={i} title={u.name} className="w-5 h-5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-950 flex items-center justify-center text-[8px] font-semibold shadow-sm">
+                                                            {u.name?.[0]?.toUpperCase()}
                                                         </div>
                                                     ))}
                                                     {(!task.assignees || task.assignees.length === 0) && (
-                                                        <div className="w-5 h-5 rounded-full bg-gray-50 border border-transparent border-dashed border-gray-300 flex items-center justify-center text-[10px] text-gray-400">
-                                                            <UserIcon size={12} />
+                                                        <div className="w-5 h-5 rounded-md border border-dashed border-zinc-800 flex items-center justify-center text-zinc-700">
+                                                            <UserIcon size={10} />
                                                         </div>
                                                     )}
                                                 </div>
@@ -151,21 +150,17 @@ export default function ProjectBoard() {
     const { id: organizationId, projectId } = router.query;
     const { user } = useSelector(state => state.auth);
 
-    // View State
-    const [viewMode, setViewMode] = useState('board'); // 'board' | 'list' | 'dashboard'
+    const [viewMode, setViewMode] = useState('board');
 
-    // Fetch Org Data for Members List
     const { data: orgData } = useGetOrganizationQuery(organizationId, { skip: !organizationId || !user });
     const members = orgData?.organization?.members || [];
 
-    // Realtime
     useSocket(projectId);
 
     const { data: tasks = [], isLoading } = useGetProjectTasksQuery(projectId, { skip: !projectId || !user });
     const [createTask] = useCreateTaskMutation();
     const [updateTask] = useUpdateTaskMutation();
     const [deleteTask] = useDeleteTaskMutation();
-    const [generateTasks, { isLoading: isGenerating }] = useGenerateTasksMutation();
 
     const [selectedTask, setSelectedTask] = useState(null);
     const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -194,7 +189,7 @@ export default function ProjectBoard() {
         try {
             await createTask({ projectId, title: newTaskTitle, status: 'todo' }).unwrap();
             setNewTaskTitle("");
-            toast.success("Task created");
+            toast.success("Task Created");
         } catch (err) {
             console.error(err);
         }
@@ -204,11 +199,10 @@ export default function ProjectBoard() {
         if (confirm("Delete this task?")) {
             deleteTask(taskId);
             setSelectedTask(null);
-            toast.success("Task deleted");
+            toast.success("Task Deleted");
         }
     };
 
-    // Derived State for columns
     const columns = {
         todo: tasks.filter(t => t.status === 'todo'),
         inprogress: tasks.filter(t => t.status === 'inprogress'),
@@ -216,78 +210,83 @@ export default function ProjectBoard() {
         done: tasks.filter(t => t.status === 'done'),
     };
 
-    if (!user) return null;
-    if (!enabled) return null;
+    if (!user || !enabled) return null;
 
     return (
         <Layout title="Project Board">
-            <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden">
-                {/* Header */}
-                <div className="px-6 py-4 flex justify-between items-center border-b border-brand-200 bg-white shadow-sm z-10">
+            <div className="flex flex-col h-[calc(100vh-140px)]">
+                {/* Board Toolbar */}
+                {/* Board Toolbar */}
+                <header className="mb-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4 xl:gap-6 pb-6 border-b border-border">
                     <div className="flex items-center gap-4">
-                        <Link href={`/organizations/${organizationId}`} className="text-brand-500 hover:text-brand-900 transition-colors flex items-center gap-2 text-sm font-medium">
-                            <ArrowLeft size={16} /> Back
+                        <Link href={`/organizations/${organizationId}`} className="p-2 hover:bg-zinc-900 border border-border rounded-xl text-zinc-500 hover:text-white transition-all">
+                            <ArrowLeft size={18} />
                         </Link>
-                        <div className="h-4 w-px bg-brand-200"></div>
-                        <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-brand-50 rounded-md text-brand-600 border border-brand-200">
-                                <LayoutIcon size={16} />
+                        <div className="h-8 w-[1px] bg-zinc-800" />
+                        <div>
+                            <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-widest text-zinc-600 mb-1">
+                                <span>Projects</span> <ChevronRight size={10} /> <span>Development</span>
                             </div>
-                            <span className="text-brand-900 font-display font-bold tracking-tight text-lg">Work Board</span>
+                            <h2 className="text-xl font-semibold text-zinc-50 tracking-tight">Project Board</h2>
                         </div>
                     </div>
 
-                    {/* View Switcher */}
-                    <div className="flex bg-gray-100 p-1 rounded-lg">
-                        <button
-                            onClick={() => setViewMode('board')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'board' ? 'bg-white shadow-sm text-brand-600' : 'text-gray-500 hover:text-gray-700'}`}
-                            title="Board View"
-                        >
-                            <Kanban size={18} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-brand-600' : 'text-gray-500 hover:text-gray-700'}`}
-                            title="List View"
-                        >
-                            <List size={18} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('dashboard')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'dashboard' ? 'bg-white shadow-sm text-brand-600' : 'text-gray-500 hover:text-gray-700'}`}
-                            title="Analytics Dashboard"
-                        >
-                            <BarChart2 size={18} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('workload')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'workload' ? 'bg-white shadow-sm text-brand-600' : 'text-gray-500 hover:text-gray-700'}`}
-                            title="Team Workload"
-                        >
-                            <UserIcon size={18} />
-                        </button>
-                    </div>
-                </div>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full xl:w-auto">
+                        <div className="flex items-center bg-zinc-900 border border-border p-1 rounded-xl shadow-inner overflow-x-auto max-w-full custom-scrollbar">
+                            {[
+                                { id: 'board', icon: Kanban, label: 'Board' },
+                                { id: 'list', icon: List, label: 'List' },
+                                { id: 'dashboard', icon: BarChart2, label: 'Analytics' },
+                                { id: 'workload', icon: UserIcon, label: 'Team' },
+                            ].map((mode) => (
+                                <button
+                                    key={mode.id}
+                                    onClick={() => setViewMode(mode.id)}
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-xs font-medium whitespace-nowrap ${viewMode === mode.id
+                                        ? 'bg-zinc-800 text-zinc-100 shadow-premium-sm border border-white/5'
+                                        : 'text-zinc-500 hover:text-zinc-300'
+                                        }`}
+                                >
+                                    <mode.icon size={14} />
+                                    <span>{mode.label}</span>
+                                </button>
+                            ))}
+                        </div>
 
-                {/* Content */}
-                <div className="flex-1 p-6 overflow-hidden bg-brand-50/30">
+                        <div className="hidden sm:block h-6 w-[1px] bg-zinc-800 mx-1" />
+
+                        <div className="flex items-center gap-2 w-full sm:w-auto ml-auto sm:ml-0">
+                            <button className="p-2 text-zinc-500 hover:text-white transition-colors">
+                                <Search size={18} />
+                            </button>
+                            <button className="p-2 text-zinc-500 hover:text-white transition-colors">
+                                <Filter size={18} />
+                            </button>
+                            <button onClick={() => document.getElementById('new-task-input')?.focus()} className="btn-primary h-9 flex-1 sm:flex-none justify-center">
+                                <Plus size={16} strokeWidth={2.5} />
+                                <span className="hidden sm:inline">Add Task</span>
+                                <span className="sm:hidden">New Task</span>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                {/* Main Content Area */}
+                <div className="flex-1 overflow-hidden">
                     {viewMode === 'board' ? (
-                        <div className="overflow-x-auto h-full">
+                        <div className="overflow-x-auto h-full pb-6 custom-scrollbar">
                             <DragDropContext onDragEnd={onDragEnd}>
-                                <div className="flex gap-6 h-full min-w-max">
+                                <div className="flex gap-4 h-full min-w-max pr-6">
                                     <TaskColumn title="To Do" status="todo" tasks={columns.todo} onTaskClick={setSelectedTask}>
                                         <form onSubmit={handleCreate} className="mb-3">
-                                            <div className="relative">
+                                            <div className="relative group">
                                                 <input
+                                                    id="new-task-input"
                                                     value={newTaskTitle}
                                                     onChange={(e) => setNewTaskTitle(e.target.value)}
-                                                    placeholder="Add Task..."
-                                                    className="w-full bg-white border border-brand-200 rounded-md pl-3 pr-8 py-2 text-sm placeholder-brand-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 shadow-sm transition-shadow"
+                                                    placeholder="+ Create task..."
+                                                    className="w-full bg-zinc-900/50 border border-border rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-brand-500/50 focus:bg-zinc-900 transition-all"
                                                 />
-                                                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-brand-400 hover:text-brand-600">
-                                                    <Plus size={16} />
-                                                </button>
                                             </div>
                                         </form>
                                     </TaskColumn>
@@ -301,19 +300,17 @@ export default function ProjectBoard() {
                             </DragDropContext>
                         </div>
                     ) : viewMode === 'list' ? (
-                        <div className="h-full overflow-y-auto">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-medium text-gray-900">All Tasks</h3>
-                                <button className="btn-primary flex items-center gap-2" onClick={() => { setNewTaskTitle("New Task"); handleCreate({ preventDefault: () => { } }); }}>
-                                    <Plus size={16} /> Add Task
-                                </button>
-                            </div>
+                        <div className="h-full overflow-y-auto pr-2 custom-scrollbar">
                             <TaskListView tasks={tasks} onTaskClick={setSelectedTask} />
                         </div>
                     ) : viewMode === 'workload' ? (
-                        <WorkloadDashboard tasks={tasks} members={members} />
+                        <div className="h-full overflow-y-auto pr-2 custom-scrollbar">
+                            <WorkloadDashboard tasks={tasks} members={members} />
+                        </div>
                     ) : (
-                        <ProjectDashboard tasks={tasks} />
+                        <div className="h-full overflow-y-auto pr-2 custom-scrollbar">
+                            <ProjectDashboard tasks={tasks} />
+                        </div>
                     )}
                 </div>
             </div>
@@ -332,7 +329,6 @@ export default function ProjectBoard() {
     );
 }
 
-// Enable SSR for authenticated routes
 export async function getServerSideProps() {
     return { props: {} };
 }

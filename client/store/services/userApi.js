@@ -27,7 +27,11 @@ export const userApi = api.injectEndpoints({
                 } catch (err) { }
             },
         }),
+        getDashboardData: builder.query({
+            query: () => 'users/dashboard',
+            providesTags: ['Dashboard'],
+        }),
     }),
 });
 
-export const { useGetMeQuery, useUpdateProfileMutation } = userApi;
+export const { useGetMeQuery, useUpdateProfileMutation, useGetDashboardDataQuery } = userApi;

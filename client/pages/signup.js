@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { setAuth } from "../store/slices/authSlice";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { Zap, Shield, ArrowRight, Github, UserPlus } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Signup() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
@@ -25,106 +27,132 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8 bg-brand-50/50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-display font-semibold text-brand-900 tracking-tight">
-          Create your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-brand-500">
-          Already have an account?{' '}
-          <Link href="/login" className="font-medium text-brand-900 hover:text-brand-700 underline transition-colors">
-            Log in
-          </Link>
-        </p>
+    <div className="min-h-screen flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden font-sans selection:bg-brand-500/30">
+      {/* GitHub Atmosphere */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-500/20 to-transparent" />
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-[400px]">
-        <div className="bg-white py-8 px-4 shadow-sm border border-brand-100 sm:rounded-xl sm:px-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center mb-10"
+      >
+        <div className="mx-auto w-12 h-12 bg-white rounded-md flex items-center justify-center text-zinc-950 shadow-premium-lg mb-6">
+          <UserPlus size={24} strokeWidth={2.5} />
+        </div>
+        <h2 className="text-3xl font-semibold text-white tracking-tight">
+          Join Nexus
+        </h2>
+        <p className="mt-2 text-sm font-medium text-fg-muted">
+          Start managing your projects with elite precision
+        </p>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1 }}
+        className="sm:mx-auto sm:w-full sm:max-w-[440px] relative z-10 px-4"
+      >
+        <div className="bg-surface border border-border shadow-premium-xl rounded-lg p-8 sm:p-10 relative overflow-hidden">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
-                {error?.data?.error || "Error signing up"}
+              <div className="bg-danger/10 border border-danger/20 text-danger px-4 py-3 rounded-md text-xs font-semibold text-center">
+                {error?.data?.error || "Could not create account"}
               </div>
             )}
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-brand-700 mb-1">
+              <label htmlFor="name" className="block text-[10px] font-semibold text-fg-muted uppercase tracking-widest mb-2.5 ml-1">
                 Full Name
               </label>
-              <div className="mt-1">
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="Jane Doe"
-                />
-              </div>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                onChange={handleChange}
+                className="input-field h-11"
+                placeholder="Jane Doe"
+              />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-brand-700 mb-1">
-                Email address
+              <label htmlFor="email" className="block text-[10px] font-semibold text-fg-muted uppercase tracking-widest mb-2.5 ml-1">
+                Email Address
               </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="name@company.com"
-                />
-              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                onChange={handleChange}
+                className="input-field h-11"
+                placeholder="name@company.com"
+              />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-brand-700 mb-1">
+              <label htmlFor="password" className="block text-[10px] font-semibold text-fg-muted uppercase tracking-widest mb-2.5 ml-1">
                 Password
               </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="Minimum 8 characters"
-                />
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                onChange={handleChange}
+                className="input-field h-11"
+                placeholder="••••••••"
+              />
             </div>
 
-            <div className="flex items-center">
+            <div className="flex items-start px-1">
               <input
                 id="terms"
                 name="terms"
                 type="checkbox"
                 required
-                className="h-4 w-4 text-brand-900 focus:ring-brand-900 border-brand-300 rounded"
+                className="h-4 w-4 bg-background border-border rounded text-brand-500 focus:ring-0 mt-0.5"
               />
-              <label htmlFor="terms" className="ml-2 block text-sm text-brand-500">
-                I agree to the <a href="#" className="font-medium text-brand-700 hover:underline">Terms</a> and <a href="#" className="font-medium text-brand-700 hover:underline">Privacy Policy</a>
+              <label htmlFor="terms" className="ml-3 block text-[10px] font-semibold text-fg-muted uppercase tracking-widest leading-relaxed">
+                By signing up, I agree to the <a href="#" className="text-zinc-200 hover:text-brand-400">Terms</a> and <a href="#" className="text-zinc-200 hover:text-brand-400">Privacy Policy</a>.
               </label>
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="btn-primary"
-              >
-                {isLoading ? "Creating Account..." : "Create Account"}
-              </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn-primary w-full h-11 text-sm font-semibold shadow-brand-500/10"
+            >
+              {isLoading ? "Creating account..." : "Create account"}
+              <ArrowRight size={16} className="ml-1" />
+            </button>
+
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border"></div></div>
+              <div className="relative flex justify-center text-[10px] uppercase font-semibold tracking-widest">
+                <span className="bg-surface px-4 text-fg-muted">Or join with</span>
+              </div>
             </div>
+
+            <button type="button" className="btn-secondary w-full h-11 text-xs font-semibold gap-3 transition-all">
+              <Github size={18} className="text-white" />
+              <span className="text-white">GitHub</span>
+            </button>
           </form>
+
+          <p className="mt-8 text-center text-xs font-medium text-fg-muted">
+            Already have an account? <Link href="/login" className="text-brand-500 hover:text-brand-400 font-semibold transition-colors">Login</Link>
+          </p>
         </div>
-      </div>
+
+        <div className="mt-8 flex items-center justify-center gap-2 text-fg-muted opacity-50">
+          <Shield size={14} />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Secure registration system</span>
+        </div>
+      </motion.div>
     </div>
   );
 }

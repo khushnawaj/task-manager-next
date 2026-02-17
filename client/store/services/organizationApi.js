@@ -22,7 +22,12 @@ export const organizationApi = api.injectEndpoints({
             }),
             invalidatesTags: ['Organization'],
         }),
+        getMyOrganizations: builder.query({
+            query: () => 'organizations',
+            providesTags: (result) =>
+                result ? [...result.map(({ _id }) => ({ type: "Organization", id: _id })), { type: "Organization", id: "LIST" }] : [{ type: "Organization", id: "LIST" }]
+        }),
     }),
 });
 
-export const { useGetOrganizationQuery, useUpdateMemberRoleMutation, useRemoveMemberMutation } = organizationApi;
+export const { useGetOrganizationQuery, useUpdateMemberRoleMutation, useRemoveMemberMutation, useGetMyOrganizationsQuery } = organizationApi;

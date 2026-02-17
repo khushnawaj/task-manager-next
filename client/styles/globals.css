@@ -4,30 +4,100 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 215 28% 7%;
+    --foreground: 210 40% 98%;
+    --card: 216 24% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 216 28% 15%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 212 92% 58%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 215 15% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 215 15% 20%;
+    --muted-foreground: 215 10% 60%;
+    --accent: 212 92% 58%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 53%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 215 15% 22%;
+    --input: 215 15% 15%;
+    --ring: 212 92% 58%;
+    --radius: 6px;
   }
 
   body {
-    @apply bg-white text-brand-900 font-sans antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    @apply bg-background text-fg-default font-sans antialiased selection:bg-brand-500/30;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-medium tracking-tight text-brand-900;
+    @apply font-semibold tracking-tight text-white;
   }
 }
 
 @layer components {
+  /* GitHub Surface Strategy */
+  .surface-bg {
+    @apply bg-background;
+  }
+  
+  .surface-base {
+    @apply bg-surface border border-border rounded-md;
+  }
+  
+  .surface-elevated {
+    @apply bg-elevated border border-border rounded-lg shadow-premium-lg;
+  }
+
+  /* Interactive Elements - GH Style with Coral Accent */
   .input-field {
-    @apply w-full px-3 py-2 bg-white border border-brand-200 rounded-lg text-sm shadow-xs placeholder-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-300 transition-all duration-200;
+    @apply w-full px-3 py-1.5 bg-background border border-border rounded-md text-sm text-fg-default placeholder:text-fg-muted 
+           focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 
+           transition-all duration-150 shadow-inner-border;
   }
   
   .btn-primary {
-    @apply w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-brand-900 hover:bg-brand-800 transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-900;
+    /* Primary action color shifted to #FF785A (success) */
+    @apply inline-flex items-center justify-center gap-2 h-8 px-4 rounded-md bg-success text-white text-sm font-semibold
+           hover:brightness-110 active:scale-[0.98] transition-all duration-150 shadow-premium-sm disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply w-full flex justify-center py-2.5 px-4 border border-brand-200 rounded-lg text-sm font-medium text-brand-700 bg-white hover:bg-brand-50 transition-all duration-200 shadow-xs focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-100;
+    @apply inline-flex items-center justify-center gap-2 h-8 px-4 rounded-md bg-surface border border-border text-brand-500 text-sm font-semibold
+           hover:bg-active hover:text-brand-400 active:scale-[0.98] transition-all duration-150 shadow-premium-sm disabled:opacity-50;
   }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 h-8 px-3 rounded-md text-fg-muted text-sm font-medium
+           hover:bg-active hover:text-white transition-all duration-150;
+  }
+
+  /* Scrollbar - GH Style */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-zinc-800 border-[3px] border-[#0d1117] bg-clip-padding rounded-full hover:bg-zinc-700;
+  }
+
+  /* Transitions */
+  .smooth-transition {
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
 }

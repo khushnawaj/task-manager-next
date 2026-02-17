@@ -60,6 +60,6 @@ const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithErrorHandling,
-  tagTypes: ['User', 'Project', 'Task', 'Organization'],
+  tagTypes: ['User', 'Project', 'Task', 'Organization', 'Notification', 'Dashboard'],
   endpoints: () => ({}),
 });

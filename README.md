@@ -1,4 +1,4 @@
-# Nexus - Enterprise Task Management Platform
+# Forge - Enterprise Task Management Platform
 
 > A production-grade, multi-tenant SaaS task management system built with modern web technologies. Designed for teams that need Microsoft Planner/Linear/Jira-level functionality with premium UX.
 
