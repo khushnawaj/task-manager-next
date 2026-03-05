@@ -37,27 +37,45 @@ export const tasksApi = api.injectEndpoints({
       }),
       // Optimistic Update
       async onQueryStarted({ id, ...patch }, { dispatch, queryFulfilled }) {
-        // Update the task in the project tasks cache
         const patchResults = [];
 
-        // Find all project task queries and update them
-        dispatch(
-          tasksApi.util.updateQueryData('getProjectTasks', patch.projectId || undefined, (draft) => {
-            const task = draft.find(t => t._id === id);
+        // 1. Update Project Tasks Cache (which is an object with { tasks, meta })
+        if (patch.projectId) {
+          patchResults.push(
+            dispatch(
+              tasksApi.util.updateQueryData('getProjectTasks', patch.projectId, (draft) => {
+                const taskList = draft?.tasks || [];
+                const task = taskList.find(t => t._id === id);
+                if (task) {
+                  Object.assign(task, patch);
+                }
+              })
+            )
+          );
+        }
+
+        // 2. Update 'My Tasks' Cache (which is an array)
+        patchResults.push(dispatch(
+          tasksApi.util.updateQueryData('getMyTasks', undefined, (draft) => {
+            // draft is an array here
+            const task = (draft || []).find(t => t._id === id);
             if (task) {
               Object.assign(task, patch);
+
+              // If status changed to done, maybe we want to keep it or remove it from 'assigned/me'
+              // For now, we just update it so the UI responds instantly.
             }
           })
-        );
+        ));
 
         try {
           await queryFulfilled;
-          // Only show toast for significant updates (not every drag-drop)
+          // Only show toast for significant updates
           if (patch.status === 'done') {
-            toast.success('Task completed! 🎉');
+            toast.success('Task completed! 🎉', { id: 'task-complete' });
           }
         } catch {
-          // Revert on error (handled by RTK Query automatically)
+          patchResults.forEach(patchResult => patchResult.undo());
         }
       },
       invalidatesTags: (result, error, arg) => [{ type: "Task", id: arg.id }]

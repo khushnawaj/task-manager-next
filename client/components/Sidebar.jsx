@@ -106,7 +106,7 @@ export default function Sidebar({ isOpen, onClose }) {
                                     <Link href="/admin" onClick={onClose}>
                                         <div className={`flex items-center gap-4 px-4 py-3 rounded-md transition-all duration-200 group ${isActive('/admin') ? 'bg-background text-white border border-border shadow-premium-sm' : 'text-fg-muted hover:text-white hover:bg-active'}`}>
                                             <Shield size={18} className={isActive('/admin') ? 'text-purple-400' : 'text-fg-muted group-hover:text-white'} />
-                                            <span className="text-sm font-semibold tracking-tight">Admin Console</span>
+                                            <span className="text-sm font-semibold tracking-tight">Admin Dashboard</span>
                                         </div>
                                     </Link>
                                 </div>

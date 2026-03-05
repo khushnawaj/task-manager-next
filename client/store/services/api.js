@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { clearAuth } from '../slices/authSlice';
+import { clearAuth, setAuth } from '../slices/authSlice';
 import toast from 'react-hot-toast';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/',
+  credentials: 'omit', // We actually need 'include' for the refresh token endpoint, but we can do it per request or global.
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token;
     if (token) {
@@ -13,26 +14,45 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// Custom base query with error handling
+// Create a custom base query that wraps fetchBaseQuery to handle token refreshes
 const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
-  const result = await baseQuery(args, api, extraOptions);
+  let result = await baseQuery(args, api, extraOptions);
 
-  // Handle errors
   if (result.error) {
     const status = result.error.status;
     const message = result.error.data?.message || result.error.data?.error || 'An error occurred';
 
-    // 401 Unauthorized - Token expired or invalid
+    // 401 Unauthorized - Token expired
     if (status === 401) {
-      // Clear auth state
-      api.dispatch(clearAuth());
+      // Avoid refreshing token if the 401 came from the login or refresh route itself
+      const requestUrl = typeof args === 'string' ? args : args.url;
+      if (requestUrl !== 'auth/login' && requestUrl !== 'auth/refresh') {
 
-      // Redirect to login (only if not already on login page)
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-        toast.error('Session expired. Please login again.');
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 1000);
+        // Try to obtain a new token using the refresh token (sent automatically via cookie)
+        const refreshResult = await baseQuery({ url: 'auth/refresh', method: 'POST', credentials: 'include' }, api, extraOptions);
+
+        if (refreshResult.data) {
+          // Token refreshed successfully, update Redux state
+          const newAccessToken = refreshResult.data.accessToken;
+          const user = refreshResult.data.user || api.getState().auth.user;
+          const organizations = api.getState().auth.organizations;
+
+          api.dispatch(setAuth({ user, token: newAccessToken, accessToken: newAccessToken, organizations }));
+
+          // Retry the original query with the new token
+          result = await baseQuery(args, api, extraOptions);
+        } else {
+          // Refresh failed, user is actually logged out
+          api.dispatch(clearAuth());
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+            toast.error('Session expired. Please login again.');
+            setTimeout(() => {
+              window.location.href = '/login';
+            }, 1000);
+          }
+        }
+      } else if (requestUrl === 'auth/refresh') {
+        api.dispatch(clearAuth());
       }
     }
     // 403 Forbidden - Insufficient permissions
@@ -48,8 +68,8 @@ const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
       toast.error('Server error. Please try again later.');
     }
     // Other errors
-    else if (status !== 'FETCH_ERROR') {
-      // Don't show toast for network errors (user might be offline)
+    else if (status !== 'FETCH_ERROR' && status !== 401) {
+      // Don't show toast for network errors or unhandled 401s (already handled)
       toast.error(message);
     }
   }

@@ -138,11 +138,8 @@ export default function Dashboard() {
                         <LayoutDashboard size={24} />
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold uppercase tracking-widest py-1 px-2.5 rounded border ${org.plan === 'pro'
-                          ? 'bg-brand-500/10 text-brand-400 border-brand-500/20'
-                          : 'bg-zinc-800 text-zinc-500 border-white/5'
-                          }`}>
-                          {org.plan === 'pro' ? 'Business' : 'Free'}
+                        <span className="text-[10px] font-bold uppercase tracking-widest py-1 px-2.5 rounded border bg-zinc-800 text-zinc-500 border-white/5">
+                          Workspace
                         </span>
                       </div>
                     </div>

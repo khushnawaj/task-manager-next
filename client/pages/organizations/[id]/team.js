@@ -32,25 +32,25 @@ export default function TeamPage() {
         e.preventDefault();
         try {
             await createInvite({ email: inviteEmail, role: inviteRole, organizationId }).unwrap();
-            toast.success('Invitation dispatched successfully');
+            toast.success('Invitation sent successfully');
             setInviteEmail('');
             setIsInviting(false);
         } catch (err) {
-            toast.error(err.data?.error || 'Dispatch failure');
+            toast.error(err.data?.error || 'Failed to send invitation');
         }
     };
 
     const handleRemove = async (userId) => {
-        if (!confirm('Execute member removal protocol?')) return;
+        if (!confirm('Are you sure you want to remove this member?')) return;
         try {
             await removeMember({ organizationId, userId }).unwrap();
-            toast.success('Member decommissioned');
+            toast.success('Member removed');
         } catch (err) {
-            toast.error('Decommission failure');
+            toast.error('Failed to remove member');
         }
     };
 
-    if (!user || orgLoading) return <Layout title="Team Intelligence">
+    if (!user || orgLoading) return <Layout title="Team Overview">
         <div className="flex items-center justify-center h-[60vh]">
             <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
         </div>
@@ -83,15 +83,15 @@ export default function TeamPage() {
     };
 
     return (
-        <Layout title="Team Intelligence">
+        <Layout title="Team Overview">
             <div className="max-w-6xl mx-auto space-y-10 py-4">
                 {/* Header Section */}
                 <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/5">
                     <div>
                         <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-2">
-                            <Users size={12} /> Personnel Management
+                            <Users size={12} /> Team Members
                         </div>
-                        <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Team Intelligence</h1>
+                        <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Team Overview</h1>
                         <p className="text-sm font-medium text-zinc-500 max-w-md">
                             Manage access, roles, and administrative permissions for <span className="text-zinc-300 font-bold">{organization?.name}</span>.
                         </p>
@@ -103,7 +103,7 @@ export default function TeamPage() {
                             className="btn-primary h-11 px-6 gap-2.5"
                         >
                             <UserPlus size={18} />
-                            <span>Invite Personnel</span>
+                            <span>Invite User</span>
                         </button>
                     )}
                 </header>
@@ -112,7 +112,7 @@ export default function TeamPage() {
                     {/* Members List - Main Body */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="flex items-center justify-between px-2">
-                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Active Operatives</h3>
+                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Active Members</h3>
                             <span className="text-[10px] font-bold bg-zinc-900 border border-white/5 text-zinc-500 px-2 py-0.5 rounded-full">{organization?.members.length} Total</span>
                         </div>
 
@@ -134,7 +134,7 @@ export default function TeamPage() {
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-sm font-bold text-white tracking-tight">{member.userId?.name || 'Decommissioned Node'}</span>
+                                                <span className="text-sm font-bold text-white tracking-tight">{member.userId?.name || 'Deleted User'}</span>
                                                 {member.userId?._id === user._id && (
                                                     <span className="text-[9px] font-bold uppercase tracking-widest bg-zinc-950 border border-white/5 px-1.5 py-0.5 rounded text-zinc-600">You</span>
                                                 )}
@@ -169,7 +169,7 @@ export default function TeamPage() {
                     <div className="space-y-8">
                         {/* Pending Section */}
                         <div className="space-y-4">
-                            <h3 className="px-2 text-xs font-bold text-zinc-500 uppercase tracking-widest">Pending Dispatch</h3>
+                            <h3 className="px-2 text-xs font-bold text-zinc-500 uppercase tracking-widest">Pending Invites</h3>
                             <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-[60px] -mr-16 -mt-16" />
 
@@ -178,7 +178,7 @@ export default function TeamPage() {
                                         <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center mx-auto text-zinc-700 border border-white/5">
                                             <Mail size={20} />
                                         </div>
-                                        <p className="text-[11px] font-bold text-zinc-600 uppercase tracking-wider">No pending dispatches</p>
+                                        <p className="text-[11px] font-bold text-zinc-600 uppercase tracking-wider">No pending invites</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-4 relative z-10">
@@ -198,15 +198,11 @@ export default function TeamPage() {
 
                         {/* Org Context */}
                         <div className="bg-zinc-900 border border-border p-6 rounded-2xl shadow-premium-sm">
-                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Workspace Intelligence</h3>
+                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Workspace Details</h3>
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
                                     <span className="text-zinc-600">ID Verification</span>
                                     <span className="text-zinc-400 font-mono">#{organizationId?.slice(-8).toUpperCase()}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                                    <span className="text-zinc-600">Auth Tier</span>
-                                    <span className="text-emerald-400">Enterprise</span>
                                 </div>
                                 <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
                                     <span className="text-zinc-600">Status</span>
@@ -241,7 +237,7 @@ export default function TeamPage() {
 
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-8">
-                                    <h3 className="text-xl font-bold text-white tracking-tight">Personnel Dispatch</h3>
+                                    <h3 className="text-xl font-bold text-white tracking-tight">Invite New Member</h3>
                                     <button onClick={() => setIsInviting(false)} className="text-zinc-600 hover:text-white transition-colors">
                                         <X size={20} />
                                     </button>
@@ -249,11 +245,11 @@ export default function TeamPage() {
 
                                 <form onSubmit={handleInvite} className="space-y-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Email Endpoint</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Email Address</label>
                                         <input
                                             type="email"
                                             required
-                                            placeholder="operatve@company.com"
+                                            placeholder="user@company.com"
                                             value={inviteEmail}
                                             onChange={(e) => setInviteEmail(e.target.value)}
                                             className="w-full bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all"
@@ -261,7 +257,7 @@ export default function TeamPage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Access Protocol</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Role</label>
                                         <select
                                             value={inviteRole}
                                             onChange={(e) => setInviteRole(e.target.value)}
@@ -275,7 +271,7 @@ export default function TeamPage() {
                                     </div>
 
                                     <button type="submit" className="btn-primary w-full h-12 text-sm font-bold uppercase tracking-widest shadow-brand-500/10">
-                                        Initiate Dispatch
+                                        Send Invitation
                                     </button>
                                 </form>
                             </div>

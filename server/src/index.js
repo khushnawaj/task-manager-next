@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { Server as IOServer } from "socket.io";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 import authRoutes from "./routes/auth.js";
 import organizationRoutes from "./routes/organizations.js";
@@ -19,20 +20,28 @@ import invitationRoutes from "./routes/invitations.js";
 import searchRoutes from "./routes/search.js";
 import notificationRoutes from "./routes/notifications.js";
 import analyticsRoutes from "./routes/analytics.js";
+import { globalErrorHandler } from "./middleware/errorHandler.js";
+import { AppError } from "./utils/errors.js";
 
 dotenv.config();
+
+// Ensure critical environment variables exist before starting the server
+const requiredEnvs = ["MONGODB_URI", "JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"];
+for (const env of requiredEnvs) {
+  if (!process.env[env]) {
+    console.error(`💥 FATAL ERROR: Missing required environment variable: ${env}`);
+    process.exit(1);
+  }
+}
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 4000;
 const CLIENT_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
 
-app.use(express.json());
-app.use(cookieParser());
-app.use(cors({
-  origin: CLIENT_ORIGIN,
-  credentials: true
-}));
+// Security Middleware
+app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" })); // Allow serving static images across origins if needed
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -41,6 +50,14 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 app.use(limiter);
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(cors({
+  origin: CLIENT_ORIGIN,
+  credentials: true
+}));
+
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -66,6 +83,14 @@ app.use("/api/invitations", invitationRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/analytics", analyticsRoutes);
+
+// Unhandled route handler
+app.all("*", (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+// Global Error Handling Middleware
+app.use(globalErrorHandler);
 
 // Connect DB and start server
 mongoose.connect(process.env.MONGODB_URI, {})

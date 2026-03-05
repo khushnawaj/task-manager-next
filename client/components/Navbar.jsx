@@ -158,7 +158,7 @@ export default function Navbar({ onMenuClick }) {
                   <div className="px-5 py-4 border-b border-white/5 mb-2 bg-zinc-950/20">
                     <p className="text-sm font-bold text-white truncate">{user.name}</p>
                     <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1 capitalize flex items-center gap-2">
-                      <Shield size={10} className="text-brand-500" /> {user.role} Identity
+                      <Shield size={10} className="text-brand-500" /> {user.role}
                     </p>
                   </div>
 
@@ -167,7 +167,7 @@ export default function Navbar({ onMenuClick }) {
                       <div className="p-2 bg-zinc-950 border border-white/5 rounded-lg group-hover:bg-brand-600 transition-colors">
                         <User size={14} />
                       </div>
-                      Profile Configuration
+                      Profile Settings
                     </Link>
 
                     {user.role === 'admin' && (
@@ -175,7 +175,7 @@ export default function Navbar({ onMenuClick }) {
                         <div className="p-2 bg-zinc-950 border border-white/5 rounded-lg group-hover:bg-indigo-600 transition-colors">
                           <Shield size={14} />
                         </div>
-                        System Intelligence
+                        Admin Dashboard
                       </Link>
                     )}
 
@@ -188,7 +188,7 @@ export default function Navbar({ onMenuClick }) {
                       <div className="p-2 bg-zinc-950 border border-white/5 rounded-lg group-hover:bg-danger-strong transition-colors">
                         <LogOut size={14} />
                       </div>
-                      Terminate Session
+                      Log Out
                     </button>
                   </div>
                 </motion.div>

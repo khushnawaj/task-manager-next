@@ -3,7 +3,9 @@ import { useGetTaskCommentsQuery, useAddCommentMutation, useGetTaskAuditLogQuery
 import { toast } from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, X, BookOpen, MessageSquare, Send, Tag, Activity, List, CheckSquare, Square, Check, Clock, Shield, User, ChevronRight, Hash, MoreHorizontal, AlignLeft, Settings, Plus, Edit2, UserPlus, FileText } from 'lucide-react';
+import { Trash2, X, BookOpen, MessageSquare, Send, Tag, Activity, List, CheckSquare, Square, Check, Clock, Shield, User, ChevronRight, Hash, MoreHorizontal, AlignLeft, Settings, Plus, Edit2, UserPlus, FileText, Eye, Edit3 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { PRIORITY_COLORS, TYPE_ICONS, formatDateTime } from '../utils/taskUtils';
 import { useSelector } from 'react-redux';
 
@@ -16,6 +18,7 @@ export default function TaskDetailsModal({ task, onClose, onUpdate, onDelete, me
     });
     const { user } = useSelector(state => state.auth);
     const [activeTab, setActiveTab] = useState('details');
+    const [isPreviewMode, setIsPreviewMode] = useState(false);
 
     const { data: comments = [], isLoading: commentsLoading } = useGetTaskCommentsQuery(task._id);
     const [addComment] = useAddCommentMutation();
@@ -160,16 +163,45 @@ export default function TaskDetailsModal({ task, onClose, onUpdate, onDelete, me
                                 {activeTab === 'details' && (
                                     <div className="space-y-8 md:space-y-10">
                                         <div className="space-y-4">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500 uppercase tracking-widest">
-                                                <AlignLeft size={14} /> Description
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500 uppercase tracking-widest">
+                                                    <AlignLeft size={14} /> Description
+                                                </div>
+                                                <div className="flex bg-zinc-900 border border-border rounded-lg p-1">
+                                                    <button
+                                                        onClick={() => setIsPreviewMode(false)}
+                                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${!isPreviewMode ? 'bg-zinc-800 text-zinc-100 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                                    >
+                                                        <Edit3 size={12} /> Write
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setIsPreviewMode(true)}
+                                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${isPreviewMode ? 'bg-zinc-800 text-zinc-100 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                                    >
+                                                        <Eye size={12} /> Preview
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <textarea
-                                                rows={8}
-                                                value={formData.description || ''}
-                                                onChange={(e) => handleChange('description', e.target.value)}
-                                                className="w-full bg-zinc-900 border border-border rounded-2xl p-4 md:p-6 text-sm text-zinc-300 placeholder-zinc-700 focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/20 transition-all resize-none shadow-premium-sm"
-                                                placeholder="Add context or instructions for this task..."
-                                            />
+
+                                            {!isPreviewMode ? (
+                                                <textarea
+                                                    rows={8}
+                                                    value={formData.description || ''}
+                                                    onChange={(e) => handleChange('description', e.target.value)}
+                                                    className="w-full bg-zinc-900 border border-border rounded-2xl p-4 md:p-6 text-sm text-zinc-300 placeholder-zinc-700 focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/20 transition-all resize-none shadow-premium-sm font-mono"
+                                                    placeholder="Add context or instructions for this task... Supports Markdown."
+                                                />
+                                            ) : (
+                                                <div className="w-full bg-zinc-950 border border-border rounded-2xl p-4 md:p-6 min-h-[16rem] overflow-y-auto shadow-inner text-sm text-zinc-200 prose prose-invert prose-sm prose-p:leading-relaxed prose-pre:bg-zinc-900 prose-pre:border prose-pre:border-border max-w-none">
+                                                    {formData.description ? (
+                                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                            {formData.description}
+                                                        </ReactMarkdown>
+                                                    ) : (
+                                                        <p className="text-zinc-600 italic mt-0">No description provided. Toggle to "Write" to add one.</p>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="bg-zinc-900/50 border border-border rounded-2xl p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">

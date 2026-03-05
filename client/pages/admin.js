@@ -33,7 +33,7 @@ export default function AdminDashboard() {
     if (!initialized || !user || user.role !== 'admin') return null;
 
     return (
-        <Layout title="Admin Console">
+        <Layout title="Admin Dashboard">
             <div className="max-w-6xl mx-auto py-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
@@ -43,9 +43,9 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                             <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-1.5">
-                                <Zap size={12} className="text-zinc-700" /> System Infrastructure
+                                <Zap size={12} className="text-zinc-700" /> System Status
                             </div>
-                            <h1 className="text-4xl font-bold text-zinc-50 tracking-tight">System Overview</h1>
+                            <h1 className="text-4xl font-bold text-zinc-50 tracking-tight">Admin Dashboard</h1>
                         </div>
                     </div>
                 </div>
@@ -71,9 +71,9 @@ export default function AdminDashboard() {
                             </div>
                             <div className="flex items-end justify-between relative z-10">
                                 <span className="text-3xl font-bold text-zinc-50 tracking-tight tabular-nums">{isLoading ? '---' : stat.value}</span>
-                                <div className="mb-1 flex items-center gap-1 text-[10px] font-bold text-zinc-500 hover:text-white cursor-pointer transition-colors px-2 py-1 rounded-lg hover:bg-zinc-800">
-                                    Report <ArrowUpRight size={12} />
-                                </div>
+                                <Link href={stat.label === 'Platform Users' ? '/admin/users' : stat.label === 'Total Workspaces' ? '/admin/workspaces' : '#'} className="mb-1 flex items-center gap-1 text-[10px] font-bold text-zinc-500 hover:text-white cursor-pointer transition-colors px-2 py-1 rounded-lg hover:bg-zinc-800">
+                                    View Report <ArrowUpRight size={12} />
+                                </Link>
                             </div>
                         </motion.div>
                     ))}
@@ -88,9 +88,9 @@ export default function AdminDashboard() {
                     >
                         <div className="px-6 py-5 border-b border-border bg-active/10 flex items-center justify-between">
                             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-                                <Users size={14} className="text-brand-500" /> Personal Node Signups
+                                <Users size={14} className="text-brand-500" /> Recent Users
                             </h3>
-                            <Link href="#" className="text-[10px] font-bold text-zinc-600 hover:text-brand-400 transition-colors uppercase tracking-[0.2em]">View All</Link>
+                            <Link href="/admin/users" className="text-[10px] font-bold text-zinc-600 hover:text-brand-400 transition-colors uppercase tracking-[0.2em]">View All</Link>
                         </div>
                         <div className="flex-1 overflow-y-auto max-h-[500px] custom-scrollbar">
                             {isLoading ? (
@@ -131,9 +131,9 @@ export default function AdminDashboard() {
                     >
                         <div className="px-6 py-5 border-b border-border bg-active/10 flex items-center justify-between">
                             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-                                <Globe size={14} className="text-emerald-500" /> New Workspace Initializations
+                                <Globe size={14} className="text-emerald-500" /> New Workspaces
                             </h3>
-                            <Link href="#" className="text-[10px] font-bold text-zinc-600 hover:text-emerald-400 transition-colors uppercase tracking-[0.2em]">Management</Link>
+                            <Link href="/admin/workspaces" className="text-[10px] font-bold text-zinc-600 hover:text-emerald-400 transition-colors uppercase tracking-[0.2em]">Manage All</Link>
                         </div>
                         <div className="flex-1 overflow-y-auto max-h-[500px] custom-scrollbar">
                             {isLoading ? (
@@ -147,15 +147,14 @@ export default function AdminDashboard() {
                                         <div>
                                             <div className="text-sm font-bold text-zinc-100 group-hover:text-white transition-colors">{org.name}</div>
                                             <div className="flex items-center gap-2 mt-0.5">
-                                                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.1em]">Plan:</span>
-                                                <span className={`text-[9px] font-bold uppercase tracking-widest ${org.plan === 'enterprise' ? 'text-purple-400' : org.plan === 'pro' ? 'text-brand-400' : 'text-zinc-600'}`}>{org.plan}</span>
+                                                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.1em]">Workspace</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end gap-1.5">
-                                        <button className="p-1.5 bg-zinc-950 border border-white/5 rounded-lg text-zinc-600 hover:text-white transition-all shadow-inner">
+                                        <Link href={`/admin/workspaces/${org._id}`} className="p-1.5 bg-zinc-950 border border-white/5 rounded-lg text-zinc-600 hover:text-white transition-all shadow-inner block">
                                             <ExternalLink size={12} />
-                                        </button>
+                                        </Link>
                                         <div className="flex items-center gap-1 text-[9px] font-bold text-zinc-600">
                                             <Calendar size={10} /> {new Date(org.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                                         </div>

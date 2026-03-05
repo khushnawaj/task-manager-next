@@ -22,7 +22,7 @@ export default function AnalyticsPage() {
     const { data: orgData, isLoading: orgLoading } = useGetOrganizationQuery(organizationId, { skip: !organizationId });
     const { data: heatmapData = [] } = useGetHeatmapQuery(undefined, { skip: !user });
 
-    if (!user || orgLoading) return <Layout title="System Intelligence">
+    if (!user || orgLoading) return <Layout title="System Analytics">
         <div className="flex items-center justify-center h-[60vh]">
             <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
         </div>
@@ -37,24 +37,24 @@ export default function AnalyticsPage() {
     ];
 
     const stats = [
-        { label: 'Network Velocity', value: '84%', icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-400/5' },
-        { label: 'Active Operatives', value: orgData?.organization?.members?.length || '0', icon: Users, color: 'text-brand-400', bg: 'bg-brand-400/5' },
-        { label: 'Synchronization', value: '99.9%', icon: Activity, color: 'text-purple-400', bg: 'bg-purple-400/5' },
-        { label: 'Task Throughput', value: '1.2k', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-400/5' },
+        { label: 'Task Velocity', value: '84%', icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-400/5' },
+        { label: 'Active Members', value: orgData?.organization?.members?.length || '0', icon: Users, color: 'text-brand-400', bg: 'bg-brand-400/5' },
+        { label: 'Uptime', value: '99.9%', icon: Activity, color: 'text-purple-400', bg: 'bg-purple-400/5' },
+        { label: 'Tasks Completed', value: '1.2k', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-400/5' },
     ];
 
     return (
-        <Layout title="System Intelligence">
+        <Layout title="System Analytics">
             <div className="max-w-7xl mx-auto space-y-10 py-4">
                 {/* Header Section */}
                 <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/5">
                     <div>
                         <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-2">
-                            <BarChart3 size={12} /> Analytical Intelligence
+                            <BarChart3 size={12} /> Analytics Overview
                         </div>
-                        <h1 className="text-4xl font-bold tracking-tight text-white mb-2">System Analytics</h1>
+                        <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Team Analytics</h1>
                         <p className="text-sm font-medium text-zinc-500 max-w-md">
-                            High-fidelity delivery metrics and personnel performance synchronization for <span className="text-zinc-300 font-bold">{orgData?.organization?.name}</span>.
+                            Delivery metrics and team performance for <span className="text-zinc-300 font-bold">{orgData?.organization?.name}</span>.
                         </p>
                     </div>
 
@@ -84,7 +84,7 @@ export default function AnalyticsPage() {
 
                 {/* Productivity Heatmap */}
                 <div className="space-y-4">
-                    <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-2">Productivity Pulse (Organization Wide)</h3>
+                    <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-2">Team Activity Heatmap</h3>
                     <ContributionHeatmap data={heatmapData} />
                 </div>
 
@@ -94,7 +94,7 @@ export default function AnalyticsPage() {
                     <div className="bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden shadow-premium-sm flex flex-col h-[400px]">
                         <div className="px-6 py-5 border-b border-white/5 bg-zinc-950/20 flex items-center justify-between">
                             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                                <TrendingUp size={14} /> Network Velocity
+                                <TrendingUp size={14} /> Task Velocity
                             </h3>
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Last 30 Days</span>
                         </div>
@@ -123,7 +123,7 @@ export default function AnalyticsPage() {
                     <div className="bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden shadow-premium-sm flex flex-col h-[400px]">
                         <div className="px-6 py-5 border-b border-white/5 bg-zinc-950/20 flex items-center justify-between">
                             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                                <Activity size={14} /> Operational Throughput
+                                <Activity size={14} /> Task Progress
                             </h3>
                             <button className="text-[10px] font-bold text-brand-400 uppercase tracking-wider hover:text-brand-300 transition-colors">Download Report</button>
                         </div>
@@ -150,11 +150,11 @@ export default function AnalyticsPage() {
                     <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -mr-48 -mt-48 group-hover:scale-110 transition-transform duration-1000" />
                     <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-bold text-white tracking-tight">Generate Strategy Forecast</h2>
-                            <p className="text-white/80 text-sm font-medium max-w-md">Utilize Neural Forge intelligence to predict delivery bottlenecks and optimize personnel allocation for the next 4 cycles.</p>
+                            <h2 className="text-2xl font-bold text-white tracking-tight">Generate Project Report</h2>
+                            <p className="text-white/80 text-sm font-medium max-w-md">Use advanced AI to see what might delay your project and how to assign your team better for the next 4 weeks.</p>
                         </div>
                         <button className="bg-white text-brand-600 px-8 py-3 rounded-xl font-bold text-sm tracking-widest uppercase shadow-xl hover:scale-105 active:scale-95 transition-all">
-                            Initiate Analysis
+                            Run Report
                         </button>
                     </div>
                 </div>
