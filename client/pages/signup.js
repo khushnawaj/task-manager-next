@@ -117,7 +117,7 @@ export default function Signup() {
                 className="h-4 w-4 bg-background border-border rounded text-brand-500 focus:ring-0 mt-0.5"
               />
               <label htmlFor="terms" className="ml-3 block text-[10px] font-semibold text-fg-muted uppercase tracking-widest leading-relaxed">
-                By signing up, I agree to the <a href="#" className="text-zinc-200 hover:text-brand-400">Terms</a> and <a href="#" className="text-zinc-200 hover:text-brand-400">Privacy Policy</a>.
+                By signing up, I agree to the <Link href="/terms" className="text-zinc-200 hover:text-brand-400">Terms</Link> and <Link href="/privacy" className="text-zinc-200 hover:text-brand-400">Privacy Policy</Link>.
               </label>
             </div>
 

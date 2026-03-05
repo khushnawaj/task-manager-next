@@ -124,6 +124,81 @@ export default function LandingPage() {
         </div>
       </main>
 
+      {/* Features Showcase */}
+      <section className="bg-zinc-950 py-32 relative z-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-24">
+            <h2 className="text-4xl md:text-5xl font-semibold text-white tracking-tight mb-6">
+              Engineered for velocity.
+            </h2>
+            <p className="text-zinc-500 font-medium max-w-2xl mx-auto text-lg">
+              Everything you need to orchestrate complex engineering workflows, delivered in a minimalist, zero-latency interface.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div className="bg-zinc-900 border border-border p-8 rounded-3xl hover:border-zinc-700 transition-colors group">
+              <div className="h-12 w-12 bg-zinc-950 border border-border rounded-xl flex items-center justify-center text-brand-500 mb-8 group-hover:scale-110 transition-transform">
+                <Activity size={24} />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3 tracking-tight">Real-time Synchronization</h3>
+              <p className="text-zinc-500 font-medium leading-relaxed">
+                Experience zero latency. State mutations propagate instantly across your organization's entire network via WebSocket architecture.
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="bg-zinc-900 border border-border p-8 rounded-3xl hover:border-zinc-700 transition-colors group">
+              <div className="h-12 w-12 bg-zinc-950 border border-border rounded-xl flex items-center justify-center text-emerald-500 mb-8 group-hover:scale-110 transition-transform">
+                <Shield size={24} />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3 tracking-tight">Enterprise RBAC</h3>
+              <p className="text-zinc-500 font-medium leading-relaxed">
+                Granular access controls allow you to define exactly who can view, mutate, or destroy resources down to the component level.
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="bg-zinc-900 border border-border p-8 rounded-3xl hover:border-zinc-700 transition-colors group">
+              <div className="h-12 w-12 bg-zinc-950 border border-border rounded-xl flex items-center justify-center text-indigo-500 mb-8 group-hover:scale-110 transition-transform">
+                <LayoutIcon size={24} />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3 tracking-tight">Advanced Analytics</h3>
+              <p className="text-zinc-500 font-medium leading-relaxed">
+                Identify deployment bottlenecks before they impact velocity. Measure operational throughput with high-fidelity telemetry.
+              </p>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="bg-zinc-900 border border-border p-8 rounded-3xl hover:border-zinc-700 transition-colors group">
+              <div className="h-12 w-12 bg-zinc-950 border border-border rounded-xl flex items-center justify-center text-rose-500 mb-8 group-hover:scale-110 transition-transform">
+                <Users size={24} />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3 tracking-tight">Team Sub-Routing</h3>
+              <p className="text-zinc-500 font-medium leading-relaxed">
+                Divide massive organizations into focused, tight-knit squads. Maintain isolated backlogs without losing high-level visibility.
+              </p>
+            </div>
+
+            {/* Feature 5 */}
+            <div className="md:col-span-2 bg-gradient-to-br from-brand-500/10 to-indigo-500/10 border border-brand-500/20 p-8 rounded-3xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/20 blur-[80px] rounded-full transform translate-x-1/2 -translate-y-1/2"></div>
+              <div className="relative z-10 flex flex-col justify-center h-full">
+                <h3 className="text-2xl font-semibold text-white mb-4 tracking-tight">Ready to integrate?</h3>
+                <p className="text-zinc-400 font-medium leading-relaxed max-w-md mb-8">
+                  Join thousands of engineering teams that have already made the switch to Forge's precision-engineered platform.
+                </p>
+                <Link href="/signup" className="flex items-center gap-2 text-brand-400 font-semibold uppercase tracking-widest text-xs hover:text-brand-300 transition-colors">
+                  Deploy Workspace <ChevronRight size={14} />
+                </Link>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* Trust Section */}
       <section className="bg-zinc-950 py-24 relative z-10 border-t border-border">
         <div className="max-w-7xl mx-auto px-6">
