@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { setAuth, setInitialized } from '../store/slices/authSlice';
 
 // Define public routes that don't need authentication
-const publicRoutes = ['/', '/login', '/signup'];
+const publicRoutes = ['/', '/login', '/signup', '/terms', '/privacy'];
 
 function AuthGuard({ children }) {
   const { user, initialized } = useSelector((state) => state.auth);
@@ -22,7 +22,7 @@ function AuthGuard({ children }) {
         // Unauthenticated user trying to access protected route
         router.push('/login');
       } else if (user && (router.pathname === '/login' || router.pathname === '/signup' || router.pathname === '/')) {
-        // Authenticated user trying to access public auth routes
+        // Authenticated user trying to access login/signup/landing
         router.push('/dashboard');
       }
     }
@@ -43,8 +43,8 @@ function AuthGuard({ children }) {
     return null;
   }
 
-  // Prevent flash of landing page if already logged in
-  if (user && isPublicRoute) {
+  // Prevent flash of landing page if already logged in (but allow viewing terms/privacy)
+  if (user && (router.pathname === '/' || router.pathname === '/login' || router.pathname === '/signup')) {
     return null;
   }
 
